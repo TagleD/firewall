@@ -260,13 +260,32 @@
                         <button type="button" class="btn btn-sm btn-outline-secondary">Share</button>
                         <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>
                     </div>
-                    <button type="button"
-                            class="btn btn-sm btn-outline-secondary dropdown-toggle d-flex align-items-center gap-1">
-                        <svg class="bi" aria-hidden="true">
-                            <use xlink:href="#calendar3"/>
-                        </svg>
-                        This week
-                    </button>
+
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false">
+                            {% if current_is_fraud == "1" %}
+                                Мошеннические
+                            {% elif current_is_fraud == "0" %}
+                                Не мошеннические
+                            {% else %}
+                                Фильтр транзакций
+                            {% endif %}
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item"
+                                   href="?{% if current_report_id %}report_id={{ current_report_id }}&{% endif %}is_fraud=">Все</a>
+                            </li>
+                            <li><a class="dropdown-item"
+                                   href="?{% if current_report_id %}report_id={{ current_report_id }}&{% endif %}is_fraud=1">Мошеннические</a>
+                            </li>
+                            <li><a class="dropdown-item"
+                                   href="?{% if current_report_id %}report_id={{ current_report_id }}&{% endif %}is_fraud=0">Не
+                                мошеннические</a></li>
+                        </ul>
+                    </div>
+
                 </div>
             </div>
 
@@ -373,6 +392,11 @@
                         </li>
                         <li class="page-item">
                             <a class="page-link" href="?page=
+                                    
+                                    
+                                    
+                                    
+                                    
                                     {{ transactions.previous_page_number }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}">Назад</a>
                         </li>
                     {% endif %}
@@ -384,10 +408,20 @@
                     {% if transactions.has_next %}
                         <li class="page-item">
                             <a class="page-link" href="?page=
+                                    
+                                    
+                                    
+                                    
+                                    
                                     {{ transactions.next_page_number }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}">Вперёд</a>
                         </li>
                         <li class="page-item">
                             <a class="page-link" href="?page=
+                                    
+                                    
+                                    
+                                    
+                                    
                                     {{ transactions.paginator.num_pages }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}">Последняя</a>
                         </li>
                     {% endif %}

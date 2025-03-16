@@ -70,8 +70,14 @@ class UserDetailView(LoginRequiredMixin, View):
 
         # Получаем report_id из query-параметров
         report_id = request.GET.get('report_id')
+        is_fraud = request.GET.get('is_fraud')
 
         transactions = Transaction.objects.filter(report__user=user)  # Только для этого пользователя
+
+        if is_fraud == "1":
+            transactions = transactions.filter(is_fraud=True)
+        elif is_fraud == "0":
+            transactions = transactions.filter(is_fraud=False)
 
         if report_id:  # Проверяем, что параметр передан
             try:
@@ -100,6 +106,7 @@ class UserDetailView(LoginRequiredMixin, View):
             "reports": reports,
             "transactions": transactions,
             "report": report,
+            "current_is_fraud": is_fraud,
         })
 
 
