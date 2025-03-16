@@ -78,7 +78,7 @@
             <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
         </nav>
         {% if request.user.is_authenticated %}
-            <a class="btn-getstarted" href="{% url 'user_detail' %}">Профиль</a>
+            <a class="btn-getstarted" href="{% url 'user_detail' user.pk %}">Профиль</a>
         {% else %}
             <a class="btn-getstarted" href="{% url 'login' %}">Войти</a>
         {% endif %}
