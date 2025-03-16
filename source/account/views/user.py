@@ -1,4 +1,6 @@
 import csv
+import json
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from django.views.generic import TemplateView, CreateView, UpdateView
@@ -65,26 +67,48 @@ class UserDetailView(LoginRequiredMixin, View):
     def get(self, request, pk):
         user = get_user_model().objects.get(pk=pk)
         form = CSVUploadForm()
-
         reports = Report.objects.filter(user=user)
 
-        # Получаем report_id из query-параметров
+        # Получаем параметры фильтрации
         report_id = request.GET.get('report_id')
         is_fraud = request.GET.get('is_fraud')
 
-        transactions = Transaction.objects.filter(report__user=user)  # Только для этого пользователя
+        # Фильтруем транзакции для конкретного пользователя
+        transactions = Transaction.objects.filter(report__user=user)
 
         if is_fraud == "1":
             transactions = transactions.filter(is_fraud=True)
         elif is_fraud == "0":
             transactions = transactions.filter(is_fraud=False)
 
-        if report_id:  # Проверяем, что параметр передан
+        if report_id:
             try:
                 report = Report.objects.get(id=report_id, user=user)  # Проверяем, что отчёт принадлежит пользователю
                 transactions = transactions.filter(report=report)
             except Report.DoesNotExist:
                 transactions = Transaction.objects.none()
+
+                # Подсчет данных для инфографики
+        total_count = transactions.count()  # Общее количество
+        fraud_count = transactions.filter(is_fraud=True).count()  # Мошеннические
+        non_fraud_count = total_count - fraud_count  # Немошеннические
+        fraud_percentage = round((fraud_count / total_count * 100),
+                                 2) if total_count > 0 else 0  # Процент мошенничества
+
+        # Гистограмма по суммам
+        amount_ranges = ["0-20", "20-30", "30-50", "50-100", "100+"]
+        amount_bins = [0, 20, 30, 50, 100, float('inf')]
+        normal_amounts = [0] * 5
+        fraud_amounts = [0] * 5
+
+        for t in transactions:
+            for i in range(len(amount_bins) - 1):
+                if amount_bins[i] <= t.amount < amount_bins[i + 1]:
+                    if t.is_fraud:
+                        fraud_amounts[i] += 1
+                    else:
+                        normal_amounts[i] += 1
+                    break
 
         # Пагинация
         paginator = Paginator(transactions, self.paginate_by)
@@ -107,6 +131,13 @@ class UserDetailView(LoginRequiredMixin, View):
             "transactions": transactions,
             "report": report,
             "current_is_fraud": is_fraud,
+            "total_count": total_count,
+            "fraud_count": fraud_count,
+            "non_fraud_count": non_fraud_count,
+            "fraud_percentage": fraud_percentage,
+            "amount_bins": json.dumps(amount_ranges),
+            "normal_amounts": json.dumps(normal_amounts),
+            "fraud_amounts": json.dumps(fraud_amounts),
         })
 
 
