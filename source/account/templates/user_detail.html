@@ -237,7 +237,7 @@
                                 <svg class="bi" aria-hidden="true">
                                     <use xlink:href="#gear-wide-connected"/>
                                 </svg>
-                                Settings
+                                Настройки
                             </a>
                         </li>
                         <li class="nav-item">
@@ -255,12 +255,18 @@
 
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">Dashboard</h1>
+                <h1 class="h2">Панель управления</h1>
 
                 <div class="btn-toolbar mb-2 mb-md-0">
                     <div class="btn-group me-2">
-                        <button type="button" class="btn btn-sm btn-outline-secondary">Share</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>
+                        <a href="{% url 'export_excel' user_obj.pk %}?report_id={{ report.id }}&is_fraud={{ current_is_fraud }}"
+                           class="btn btn-sm btn-outline-secondary button-padding-8">
+                            Экспорт в EXCEL
+                        </a>
+                        <a href="{% url 'export_csv' user_obj.pk %}?report_id={{ report.id }}&is_fraud={{ current_is_fraud }}"
+                           class="btn btn-sm btn-outline-secondary button-padding-8">
+                            Экспорт в CSV
+                        </a>
                     </div>
 
                     <div class="dropdown">
@@ -300,7 +306,7 @@
                     <canvas id="amountHistogram"></canvas>  <!-- Гистограмма сумм -->
                 </div>
             </div>
-{#            <canvas class="my-4 w-40" id="fraudPieChart" width="300" height="380"></canvas>#}
+            {#            <canvas class="my-4 w-40" id="fraudPieChart" width="300" height="380"></canvas>#}
 
             {% if report %}
                 <h2>Транзакции отчета - {{ report.name }}</h2>
@@ -399,16 +405,10 @@
                     {% if transactions.has_previous %}
                         <li class="page-item">
                             <a class="page-link"
-                               href="?page=1{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}">Первая</a>
+                               href="?page=1{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}">Первая</a>
                         </li>
                         <li class="page-item">
-                            <a class="page-link" href="?page=
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    {{ transactions.previous_page_number }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}">Назад</a>
+                            <a class="page-link" href="?page={{ transactions.previous_page_number }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %} &is_fraud={{ current_is_fraud }}">Назад</a>
                         </li>
                     {% endif %}
 
@@ -418,22 +418,10 @@
 
                     {% if transactions.has_next %}
                         <li class="page-item">
-                            <a class="page-link" href="?page=
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    {{ transactions.next_page_number }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}">Вперёд</a>
+                            <a class="page-link" href="?page={{ transactions.next_page_number }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}">Вперёд</a>
                         </li>
                         <li class="page-item">
-                            <a class="page-link" href="?page=
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    {{ transactions.paginator.num_pages }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}">Последняя</a>
+                            <a class="page-link" href="?page={{ transactions.paginator.num_pages }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}">Последняя</a>
                         </li>
                     {% endif %}
                 </ul>
@@ -519,54 +507,54 @@
 {#</script>#}
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-    // Данные из Django
-    const fraudCount = {{ fraud_count }};
-    const totalCount = {{ total_count }};
-    const normalCount = totalCount - fraudCount;
+        // Данные из Django
+        const fraudCount = {{ fraud_count }};
+        const totalCount = {{ total_count }};
+        const normalCount = totalCount - fraudCount;
 
-    const amountBins = {{ amount_bins|safe }};
-    const normalAmounts = {{ normal_amounts|safe }};
-    const fraudAmounts = {{ fraud_amounts|safe }};
+        const amountBins = {{ amount_bins|safe }};
+        const normalAmounts = {{ normal_amounts|safe }};
+        const fraudAmounts = {{ fraud_amounts|safe }};
 
-    // Круговая диаграмма (общая статистика мошенничества)
-    new Chart(document.getElementById('fraudPieChart').getContext('2d'), {
-        type: 'pie',
-        data: {
-            labels: ["Обычные транзакции", "Мошеннические транзакции"],
-            datasets: [{
-                data: [normalCount, fraudCount],
-                backgroundColor: ["#4CAF50", "#FF5252"],
-            }]
-        }
-    });
-
-    // Гистограмма по суммам
-    new Chart(document.getElementById('amountHistogram').getContext('2d'), {
-        type: 'bar',
-        data: {
-            labels: amountBins,
-            datasets: [
-                {
-                    label: "Обычные транзакции",
-                    data: normalAmounts,
-                    backgroundColor: "#4CAF50"
-                },
-                {
-                    label: "Мошеннические транзакции",
-                    data: fraudAmounts,
-                    backgroundColor: "#FF5252"
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                x: { title: { display: true, text: "Диапазоны сумм ($)" } },
-                y: { title: { display: true, text: "Количество транзакций" } }
+        // Круговая диаграмма (общая статистика мошенничества)
+        new Chart(document.getElementById('fraudPieChart').getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: ["Обычные транзакции", "Мошеннические транзакции"],
+                datasets: [{
+                    data: [normalCount, fraudCount],
+                    backgroundColor: ["#4CAF50", "#FF5252"],
+                }]
             }
-        }
+        });
+
+        // Гистограмма по суммам
+        new Chart(document.getElementById('amountHistogram').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: amountBins,
+                datasets: [
+                    {
+                        label: "Обычные транзакции",
+                        data: normalAmounts,
+                        backgroundColor: "#4CAF50"
+                    },
+                    {
+                        label: "Мошеннические транзакции",
+                        data: fraudAmounts,
+                        backgroundColor: "#FF5252"
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {title: {display: true, text: "Диапазоны сумм ($)"}},
+                    y: {title: {display: true, text: "Количество транзакций"}}
+                }
+            }
+        });
     });
-});
 </script>
 
 </body>
