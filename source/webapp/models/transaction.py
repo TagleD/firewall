@@ -36,6 +36,12 @@ class Transaction(models.Model):
     v27 = models.FloatField()
     v28 = models.FloatField()
     is_fraud = models.BooleanField(default=False)  # Флаг мошенничества
+    transaction_varchar_id = models.CharField(
+        max_length=10,
+        null=False,
+        blank=False,
+        verbose_name="Уникальный сгенерированный ID транзакции"
+    )
 
     def __str__(self):
         return f"Transaction {self.id} - Fraud: {self.is_fraud}"

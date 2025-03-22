@@ -1,5 +1,7 @@
 import csv
 import json
+import string
+import random
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Sum
@@ -73,9 +75,13 @@ class UserDetailView(LoginRequiredMixin, View):
         # Получаем параметры фильтрации
         report_id = request.GET.get('report_id')
         is_fraud = request.GET.get('is_fraud')
+        search_query = request.GET.get('search', "").strip()  # Поисковый запрос
 
         # Фильтруем транзакции для конкретного пользователя
         transactions = Transaction.objects.filter(report__user=user)
+
+        if search_query:
+            transactions = transactions.filter(transaction_varchar_id__icontains=search_query)
 
         if is_fraud == "1":
             transactions = transactions.filter(is_fraud=True)
@@ -189,6 +195,7 @@ class UserDetailView(LoginRequiredMixin, View):
             "new_fraud_transactions_count" : new_fraud_transactions_count,
             "new_fraud_total_amount": new_fraud_total_amount,
             "fraud_percentage_change": fraud_percentage_change,
+            "search_query": search_query,
         })
 
     def post(self, request, pk):
@@ -204,14 +211,19 @@ class UserDetailView(LoginRequiredMixin, View):
             # Создаём новый отчет
             report = Report.objects.create(user=request.user, name=report_name)
 
+            # Генерируем случайный 3-буквенный префикс
+            prefix = ''.join(random.choices(string.ascii_uppercase, k=3))
+
             transactions = []
-            count = 0
+            count = 1
             for row in reader:
                 time, amount = float(row[0]), float(row[29])
                 features = list(map(float, row[1:29]))  # V1 - V28
                 is_fraud = predict_anomaly(features)  # Анализируем транзакцию
+                transaction_varchar_id = f"{prefix}-{count:06d}"
 
                 transaction = Transaction(
+                    transaction_varchar_id=transaction_varchar_id,  # Формат AAA-000001
                     report=report,
                     time=time,
                     amount=amount,

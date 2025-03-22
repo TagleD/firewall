@@ -5,7 +5,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title {{ report }}</title>
+    <title>{{ user.username }} Transactions<</title>
 
     <link href="{% static '/css/bootstrap.min.css' %}" rel="stylesheet">
     <link href="{% static 'css/dashboard.css' %}" rel="stylesheet">
@@ -89,9 +89,10 @@
         </li>
     </ul>
 
-    <div id="navbarSearch" class="navbar-search w-100 collapse">
-        <input class="form-control w-100 rounded-0 border-0" type="text" placeholder="Search" aria-label="Search">
-    </div>
+    {#    <div id="navbarSearch" class="navbar-search w-100 collapse">#}
+    {#        <input id="searchInput" class="form-control w-100 rounded-0 border-0"#}
+    {#               type="text" placeholder="Search transaction by ID" aria-label="Search">#}
+    {#    </div>#}
 </header>
 
 <div class="container-fluid">
@@ -175,25 +176,6 @@
                         </div>
                     </h6>
 
-                    {#                    <!-- Modal -->#}
-                    {#                    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"#}
-                    {#                         aria-hidden="true">#}
-                    {#                        <div class="modal-dialog modal-dialog-centered">#}
-                    {#                            <div class="modal-content">#}
-                    {#                                <div class="modal-header">#}
-                    {#                                    <h5 class="modal-title" id="exampleModalLabel">Создание нового отчета</h5>#}
-                    {#                                </div>#}
-                    {#                                <div class="modal-body">#}
-                    {#                                    ...#}
-                    {#                                </div>#}
-                    {#                                <div class="modal-footer">#}
-                    {#                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена#}
-                    {#                                    </button>#}
-                    {#                                    <button type="button" class="btn btn-primary">Сохранить изменения</button>#}
-                    {#                                </div>#}
-                    {#                            </div>#}
-                    {#                        </div>#}
-                    {#                    </div>#}
                     <!-- Модальное окно -->
                     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
                          aria-hidden="true">
@@ -238,7 +220,7 @@
                                             data-report-id="{{ report.id }}" style="padding: 0">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                              fill="currentColor"
-                                             class="bi bi-trash3-fill" viewBox="0 0 16 16">
+                                             class="bi bi-trash3-fill" viewBox="0 0 16 16" style="margin-top: -7px;">
                                             <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"></path>
                                         </svg>
                                     </button>
@@ -275,7 +257,14 @@
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 class="h2">Fraud Detection Dashboard</h1>
 
+
                 <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="button" style="margin-right: 15px;">
+                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                            Add Report
+                        </button>
+                    </div>
+
                     <div class="btn-group me-2">
                         <a href="{% url 'export_excel' user_obj.pk %}?report_id={{ report.id }}&is_fraud={{ current_is_fraud }}"
                            class="btn btn-sm btn-outline-secondary button-padding-8">
@@ -286,39 +275,13 @@
                             Export to CSV
                         </a>
                     </div>
-
-                    <div class="dropdown">
-                        <button class="btn btn-outline-secondary dropdown-toggle" type="button"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false">
-                            {% if current_is_fraud == "1" %}
-                                Fraudulent
-                            {% elif current_is_fraud == "0" %}
-                                Non-Fraudulent
-                            {% else %}
-                                Transaction Filter
-                            {% endif %}
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item"
-                                   href="?{% if current_report_id %}report_id={{ current_report_id }}&{% endif %}is_fraud=">All</a>
-                            </li>
-                            <li><a class="dropdown-item"
-                                   href="?{% if current_report_id %}report_id={{ current_report_id }}&{% endif %}is_fraud=1">Fraudulent</a>
-                            </li>
-                            <li><a class="dropdown-item"
-                                   href="?{% if current_report_id %}report_id={{ current_report_id }}&{% endif %}is_fraud=0">Non-Fraudulent</a>
-                            </li>
-                        </ul>
-                    </div>
-
                 </div>
             </div>
 
             <div class="row cards-margin">
 
                 <div class="col-3">
-                    <div class="card" style="width: 100%;">
+                    <div class="card card-special" style="width: 100%;">
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-10">
@@ -345,7 +308,7 @@
                 </div>
 
                 <div class="col-3">
-                    <div class="card" style="width: 100%;">
+                    <div class="card card-special" style="width: 100%;">
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-10">
@@ -372,7 +335,7 @@
                 </div>
 
                 <div class="col-3">
-                    <div class="card" style="width: 100%;">
+                    <div class="card card-special" style="width: 100%;">
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-10">
@@ -403,7 +366,7 @@
                 </div>
 
                 <div class="col-3">
-                    <div class="card" style="width: 100%;">
+                    <div class="card card-special" style="width: 100%;">
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-10">
@@ -449,126 +412,137 @@
                     </div>
                 </div>
             </div>
-            {#            <canvas class="my-4 w-40" id="fraudPieChart" width="300" height="380"></canvas>#}
 
-            {% if report %}
-                <h2>Transactions of report - {{ report.name }}</h2>
-            {% else %}
-                <h2>Transactions of all reports</h2>
-            {% endif %}
-            <div class="table-responsive small">
-                <table class="table table-striped table-sm">
-                    <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Fraudulent</th>
-                        <th scope="col">Time</th>
-                        <th scope="col">Amount</th>
-                        <th scope="col">V1</th>
-                        <th scope="col">V2</th>
-                        <th scope="col">V3</th>
-                        <th scope="col">V4</th>
-                        <th scope="col">V5</th>
-                        <th scope="col">V6</th>
-                        <th scope="col">V7</th>
-                        <th scope="col">V8</th>
-                        <th scope="col">V9</th>
-                        <th scope="col">V10</th>
-                        <th scope="col">V11</th>
-                        <th scope="col">V12</th>
-                        <th scope="col">V13</th>
-                        <th scope="col">V14</th>
-                        <th scope="col">V15</th>
-                        <th scope="col">V16</th>
-                        <th scope="col">V17</th>
-                        <th scope="col">V18</th>
-                        <th scope="col">V19</th>
-                        <th scope="col">V20</th>
-                        <th scope="col">V21</th>
-                        <th scope="col">V22</th>
-                        <th scope="col">V23</th>
-                        <th scope="col">V24</th>
-                        <th scope="col">V25</th>
-                        <th scope="col">V26</th>
-                        <th scope="col">V27</th>
-                        <th scope="col">V28</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for transaction in transactions %}
-                        {% if transaction.is_fraud == False %}
-                            <tr class="table-success">
-                                {% else %}
-                            <tr class="table-danger">
-                        {% endif %}
-                    <td>{{ forloop.counter }}</td>
-                    {% if transaction.is_fraud == False %}
-                        <td>Нет</td>
+            <!-- Вывод списка транзакций -->
+            <div class="card" style=" margin-bottom: 100px;">
+                <div class="card-body">
+                    {% if report %}
+                        <h2>Transactions of report - {{ report.name }}</h2>
                     {% else %}
-                        <td>Да</td>
+                        <h2>Transactions of all reports</h2>
                     {% endif %}
-                    <td>{{ transaction.time }}</td>
-                    <td>{{ transaction.amount }}</td>
-                    <td>{{ transaction.v1 }}</td>
-                    <td>{{ transaction.v2 }}</td>
-                    <td>{{ transaction.v3 }}</td>
-                    <td>{{ transaction.v4 }}</td>
-                    <td>{{ transaction.v5 }}</td>
-                    <td>{{ transaction.v6 }}</td>
-                    <td>{{ transaction.v7 }}</td>
-                    <td>{{ transaction.v8 }}</td>
-                    <td>{{ transaction.v9 }}</td>
-                    <td>{{ transaction.v10 }}</td>
-                    <td>{{ transaction.v11 }}</td>
-                    <td>{{ transaction.v12 }}</td>
-                    <td>{{ transaction.v13 }}</td>
-                    <td>{{ transaction.v14 }}</td>
-                    <td>{{ transaction.v15 }}</td>
-                    <td>{{ transaction.v16 }}</td>
-                    <td>{{ transaction.v17 }}</td>
-                    <td>{{ transaction.v18 }}</td>
-                    <td>{{ transaction.v19 }}</td>
-                    <td>{{ transaction.v20 }}</td>
-                    <td>{{ transaction.v21 }}</td>
-                    <td>{{ transaction.v22 }}</td>
-                    <td>{{ transaction.v23 }}</td>
-                    <td>{{ transaction.v24 }}</td>
-                    <td>{{ transaction.v25 }}</td>
-                    <td>{{ transaction.v26 }}</td>
-                    <td>{{ transaction.v27 }}</td>
-                    <td>{{ transaction.v28 }}</td>
-                    </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+                    <h6 class="card-subtitle mb-2 text-body-secondary" style="margin-left: 3px;">
+                        Review and investigate potentially fraudulent transactions
+                    </h6>
+
+                    <div class="row" style="margin-top: 25px;">
+                        <div class="col-10">
+                            <input class="form-control" list="datalistOptions" id="searchInput"
+                                   placeholder="Search transaction by ID">
+                        </div>
+                        <div class="col-2">
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary dropdown-toggle" type="button"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false">
+                                    {% if current_is_fraud == "1" %}
+                                        Fraudulent
+                                    {% elif current_is_fraud == "0" %}
+                                        Non-Fraudulent
+                                    {% else %}
+                                        Transaction Filter
+                                    {% endif %}
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item"
+                                           href="?{% if current_report_id %}report_id={{ current_report_id }}&{% endif %}is_fraud=&search={{ search_query }}">All</a>
+                                    </li>
+                                    <li><a class="dropdown-item"
+                                           href="?{% if current_report_id %}report_id={{ current_report_id }}&{% endif %}is_fraud=1&search={{ search_query }}">Fraudulent</a>
+                                    </li>
+                                    <li><a class="dropdown-item"
+                                           href="?{% if current_report_id %}report_id={{ current_report_id }}&{% endif %}is_fraud=0&search={{ search_query }}">Non-Fraudulent</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <table class="table table-hover" style="border: 1px solid #dee2e6; margin-top: 20px;">
+                        <thead>
+                        <tr>
+                            <th scope="col" style="padding-left: 30px">Transaction ID</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Amount</th>
+                            <th scope="col">Report</th>
+                            <th scope="col" style="text-align: center;">Status</th>
+                            <th scope="col" style="padding-left: 50px;">View Data</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for transaction in transactions %}
+                            <tr>
+                                <th scope="row" style="padding-left: 30px">{{ transaction.transaction_varchar_id }}</th>
+                                <td>{{ transaction.time }}</td>
+                                <td>{{ transaction.amount }}$</td>
+                                <td>{{ transaction.report.name }}</td>
+                                {% if transaction.is_fraud == False %}
+                                    <td>
+                                        <p style="margin:0; font-size: 14px; border: 1px solid #90ee90; border-radius: 50px; text-align: left; background: #e6ffe6; color: #7fd87f;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                 fill="currentColor" class="bi bi-check-circle" viewBox="0 0 16 16"
+                                                 style="margin-left: 7px; margin-top: -3px; margin-right: 1px;">
+                                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                                <path d="m10.97 4.97-.02.022-3.473 4.425-2.093-2.094a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05"/>
+                                            </svg>
+                                            Normal
+                                        </p>
+                                    </td>
+                                {% else %}
+                                    <td>
+                                        <p style="margin:0; font-size: 14px; border: 1px solid #ff0000; border-radius: 50px; text-align: left; background: #ffbfbf; color: #ff0000;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                 fill="currentColor" class="bi bi-exclamation-circle"
+                                                 viewBox="0 0 16 16"
+                                                 style="margin-left: 7px; margin-top: -3px; margin-right: 1px;">
+                                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                                <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/>
+                                            </svg>
+                                            Fraudulent
+                                        </p>
+                                    </td>
+                                {% endif %}
+                                <td style="padding-left: 50px;">
+                                    <a href="#" class="text-decoration-none">View Data</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+
+                        </tbody>
+                    </table>
+
+                    <nav style="margin-top: 20px;">
+                        <ul class="pagination" style="justify-content: center;">
+                            {% if transactions.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link"
+                                       href="?page=1{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">First</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=
+                                            {{ transactions.previous_page_number }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Back</a>
+                                </li>
+                            {% endif %}
+
+                            <li class="page-item disabled">
+                                <span class="page-link">Page {{ transactions.number }} of {{ transactions.paginator.num_pages }}</span>
+                            </li>
+
+                            {% if transactions.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=
+                                            {{ transactions.next_page_number }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Forward</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=
+                                            {{ transactions.paginator.num_pages }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Last</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+
+                </div>
             </div>
-
-            <nav style="margin-top: 20px;">
-                <ul class="pagination">
-                    {% if transactions.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link"
-                               href="?page=1{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}">First</a>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ transactions.previous_page_number }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %} &is_fraud={{ current_is_fraud }}">Back</a>
-                        </li>
-                    {% endif %}
-
-                    <li class="page-item disabled">
-                        <span class="page-link">Page {{ transactions.number }} of {{ transactions.paginator.num_pages }}</span>
-                    </li>
-
-                    {% if transactions.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ transactions.next_page_number }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}">Forward</a>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ transactions.paginator.num_pages }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}">Last</a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </nav>
 
         </main>
     </div>
@@ -725,6 +699,40 @@
                 }
             });
         });
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let searchInput = document.getElementById("searchInput");
+
+        if (searchInput) {
+            // Получаем текущий параметр search из URL
+            let urlParams = new URLSearchParams(window.location.search);
+            let searchQuery = urlParams.get("search");
+
+            // Если в URL есть search, подставляем его в input
+            if (searchQuery) {
+                searchInput.value = searchQuery;
+            }
+
+            // Добавляем обработчик для поиска по Enter
+            searchInput.addEventListener("keydown", function (event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    let newSearchQuery = this.value.trim();
+                    let url = new URL(window.location.href);
+
+                    if (newSearchQuery) {
+                        url.searchParams.set("search", newSearchQuery);
+                    } else {
+                        url.searchParams.delete("search"); // Удаляем параметр, если пустой ввод
+                    }
+
+                    window.location.href = url.toString();
+                }
+            });
+        }
     });
 </script>
 
