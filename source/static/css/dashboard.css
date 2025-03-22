@@ -51,3 +51,43 @@
 .button-padding-8 {
     padding-top: 8px;
 }
+
+.border-none {
+    border: none;
+}
+
+/*.width-80 {*/
+/*    width: 80%;*/
+/*}*/
+
+/*.display-inline-block {*/
+/*    display: inline-block !important;*/
+/*}*/
+
+.nav-append {
+    list-style: none;
+    --bs-nav-link-color: var(--bs-link-color);
+    --bs-nav-link-hover-color: var(--bs-link-hover-color);
+    --bs-nav-link-disabled-color: var(--bs-secondary-color);
+}
+
+.margin-b-5 {
+    margin-bottom: 5px;
+}
+
+.margin-bottom-15 {
+    margin-bottom: 15px;
+}
+
+.cards-margin {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.diagrams-margin {
+    margin-bottom: 30px;
+}
+
+.card {
+    height: 100%;
+}
