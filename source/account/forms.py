@@ -22,13 +22,13 @@ class LoginForm(forms.Form):
 
 class CustomUserCreationForm(forms.ModelForm):
     password = forms.CharField(
-        label='Пароль',
+        label='Password',
         strip=False,
         required=True,
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'})
     )
     password_confirm = forms.CharField(
-        label='Подтвердите пароль',
+        label='Confirm your password',
         strip=False,
         required=True,
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Repeat Password'})
@@ -49,10 +49,10 @@ class CustomUserCreationForm(forms.ModelForm):
         try:
             validate_email(email)
         except ValidationError:
-            raise ValidationError('Введите правильный адрес электронной почты.')
+            raise ValidationError('Please enter a valid email address.')
 
         if get_user_model().objects.filter(email=email).exists():
-            raise ValidationError('Пользователь с таким email уже существует.')
+            raise ValidationError('A user with this email already exists.')
 
         return email
 
@@ -67,7 +67,7 @@ class CustomUserCreationForm(forms.ModelForm):
         password_confirm = cleaned_data.get('password_confirm')
 
         if password and password_confirm and password != password_confirm:
-            raise ValidationError('Пароли не совпадают.')
+            raise ValidationError('The passwords do not match.')
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -117,3 +117,14 @@ class UserForm(forms.ModelForm):
         bottom = (height + min_side) / 2
         cropped_img = img.crop((left, top, right, bottom))
         cropped_img.save(user.avatar.path)
+
+
+class UserSettingsForm(forms.ModelForm):
+
+    class Meta:
+        model = get_user_model()
+        fields = ['username', 'pagination_count']
+        labels = {
+            'username': 'Nickname',
+            'pagination_count': 'Number of records per page',
+        }

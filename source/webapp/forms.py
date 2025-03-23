@@ -4,11 +4,17 @@ from django import forms
 
 class CSVUploadForm(forms.Form):
     report_name = forms.CharField(
-        label="Название отчета",
+        label="Report title",
         max_length=255
     )
     csv_file = forms.FileField(
-        widget=forms.FileInput(attrs={'accept': '.csv'})  # Фильтруем файлы в UI
+        widget=forms.FileInput(
+            attrs={
+                'accept': '.csv',
+                'class': 'custom-file-input',
+                'data-text': 'Upload CSV'  # Твой текст
+            }
+        )
     )
 
     def clean_csv_file(self):
@@ -18,6 +24,6 @@ class CSVUploadForm(forms.Form):
         if file:
             ext = os.path.splitext(file.name)[1].lower()
             if ext != ".csv":
-                raise forms.ValidationError("Можно загружать только CSV-файлы!")
+                raise forms.ValidationError("Only CSV files can be uploaded!")
 
         return file

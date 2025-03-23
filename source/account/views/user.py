@@ -13,7 +13,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-from account.forms import LoginForm, CustomUserCreationForm, UserForm
+from account.forms import LoginForm, CustomUserCreationForm, UserForm, UserSettingsForm
 from webapp.forms import CSVUploadForm
 from webapp.models import Report, Transaction
 from webapp.utils import predict_anomaly
@@ -65,10 +65,11 @@ def logout_view(request):
 
 class UserDetailView(LoginRequiredMixin, View):
     template_name = 'user_detail.html'
-    paginate_by = 100  # Количество записей на страницу
+    paginate_by = 50  # Количество записей на страницу
 
     def get(self, request, pk):
         user = get_user_model().objects.get(pk=pk)
+        self.paginate_by = user.pagination_count
         form = CSVUploadForm()
         reports = Report.objects.filter(user=user)
 
@@ -249,9 +250,10 @@ class UserDetailView(LoginRequiredMixin, View):
 
 
 class UserUpdateView(LoginRequiredMixin, UpdateView):
-    template_name = 'user_update.html'
+    template_name = 'settings.html'
     model = get_user_model()
-    form_class = UserForm
+    form_class = UserSettingsForm
 
     def get_success_url(self):
         return reverse('user_detail', kwargs={'pk': self.object.pk})
+

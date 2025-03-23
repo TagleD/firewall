@@ -91,3 +91,7 @@
 .card-special {
     height: 100%;
 }
+
+.custom-file-input::file-selector-button {
+    content: attr(data-text) !important;
+}
