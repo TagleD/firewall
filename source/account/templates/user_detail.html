@@ -642,7 +642,6 @@
                             <th scope="col" style="padding-left: 30px">Transaction ID</th>
                             <th scope="col">Date</th>
                             <th scope="col">Amount</th>
-                            <th scope="col">Report</th>
                             <th scope="col">Risk Score</th>
                             <th scope="col" style="text-align: center;">Status</th>
                             <th scope="col" style="padding-left: 50px;">View Data</th>
@@ -654,7 +653,6 @@
                                 <th scope="row" style="padding-left: 30px">{{ transaction.transaction_varchar_id }}</th>
                                 <td>{{ transaction.time|date:"D, d M Y H:i" }}</td>
                                 <td>{{ transaction.amount }}$</td>
-                                <td>{{ transaction.report.name }}</td>
                                 <td>
                                     <p 
                                             {% if transaction.risk_score > 0 and transaction.risk_score < 60 %}
