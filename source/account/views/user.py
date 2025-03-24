@@ -6,10 +6,12 @@ import random
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Sum
 from django.views import View
+from datetime import timedelta, datetime
 from django.views.generic import TemplateView, CreateView, UpdateView
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.utils.translation import gettext_lazy as _
 from django.shortcuts import redirect, render
+from django.utils.timezone import make_aware
 from django.urls import reverse, reverse_lazy
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
@@ -17,6 +19,9 @@ from account.forms import LoginForm, CustomUserCreationForm, UserForm, UserSetti
 from webapp.forms import CSVUploadForm
 from webapp.models import Report, Transaction
 from webapp.utils import predict_anomaly
+
+
+BASE_DATE = make_aware(datetime(2024, 9, 1, 0, 0, 0))  # 1 сентября 2024, 00:00:00 UTC
 
 
 class LoginView(TemplateView):
@@ -220,13 +225,15 @@ class UserDetailView(LoginRequiredMixin, View):
             for row in reader:
                 time, amount = float(row[0]), float(row[29])
                 features = list(map(float, row[1:29]))  # V1 - V28
-                is_fraud = predict_anomaly(features)  # Анализируем транзакцию
+                is_fraud, risk_score, explanation = predict_anomaly(features)  # Анализируем транзакцию
                 transaction_varchar_id = f"{prefix}-{count:06d}"
+
+                transaction_time = BASE_DATE + timedelta(seconds=time)  # Считаем реальную дату
 
                 transaction = Transaction(
                     transaction_varchar_id=transaction_varchar_id,  # Формат AAA-000001
                     report=report,
-                    time=time,
+                    time=transaction_time,
                     amount=amount,
                     v1=features[0], v2=features[1], v3=features[2], v4=features[3],
                     v5=features[4], v6=features[5], v7=features[6], v8=features[7],
@@ -236,6 +243,8 @@ class UserDetailView(LoginRequiredMixin, View):
                     v21=features[20], v22=features[21], v23=features[22], v24=features[23],
                     v25=features[24], v26=features[25], v27=features[26], v28=features[27],
                     is_fraud=is_fraud,
+                    explanation=explanation,
+                    risk_score=risk_score,
                 )
                 transactions.append(transaction)
                 print(f"Транзакция {count} обработана")

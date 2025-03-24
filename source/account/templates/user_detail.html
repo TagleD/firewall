@@ -9,6 +9,7 @@
 
     <link href="{% static '/css/bootstrap.min.css' %}" rel="stylesheet">
     <link href="{% static 'css/dashboard.css' %}" rel="stylesheet">
+
 </head>
 <body>
 
@@ -161,18 +162,18 @@
 
                     <h6 class="sidebar-heading align-items-center px-3 mt-4 margin-bottom-15 text-body-secondary text-uppercase">
                         <div class="row">
-                            <div class="col-10">
+                            <div class="col-12">
                                 <span>My Reports</span>
                             </div>
-                            <div class="col-2">
-                                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                                        data-bs-target="#exampleModal"
-                                        style="background: none; border: none; margin-top: -12px; padding: 0;">
-                                    <svg class="bi" aria-hidden="true">
-                                        <use xlink:href="#plus-circle"/>
-                                    </svg>
-                                </button>
-                            </div>
+                            {#                            <div class="col-2">#}
+                            {#                                <button type="button" class="btn btn-primary" data-bs-toggle="modal"#}
+                            {#                                        data-bs-target="#exampleModal"#}
+                            {#                                        style="background: none; border: none; margin-top: -12px; padding: 0;">#}
+                            {#                                    <svg class="bi" aria-hidden="true">#}
+                            {#                                        <use xlink:href="#plus-circle"/>#}
+                            {#                                    </svg>#}
+                            {#                                </button>#}
+                            {#                            </div>#}
                         </div>
                     </h6>
 
@@ -233,7 +234,8 @@
 
                     <ul class="nav flex-column mb-auto">
                         <li class="nav-item">
-                            <a class="nav-link d-flex align-items-center gap-2" href="{% url 'user_settings' user.pk %}">
+                            <a class="nav-link d-flex align-items-center gap-2"
+                               href="{% url 'user_settings' user.pk %}">
                                 <svg class="bi" aria-hidden="true">
                                     <use xlink:href="#gear-wide-connected"/>
                                 </svg>
@@ -443,8 +445,16 @@
                                     <td id="modalTransactionReport"></td>
                                 </tr>
                                 <tr>
+                                    <th>Risk Score</th>
+                                    <td id="modalTransactionRiskScore"></td>
+                                </tr>
+                                <tr>
                                     <th>Status</th>
                                     <td id="modalTransactionStatus"></td>
+                                </tr>
+                                <tr>
+                                    <th>Explanation</th>
+                                    <td id="modalTransactionExplanation"></td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -633,6 +643,7 @@
                             <th scope="col">Date</th>
                             <th scope="col">Amount</th>
                             <th scope="col">Report</th>
+                            <th scope="col">Risk Score</th>
                             <th scope="col" style="text-align: center;">Status</th>
                             <th scope="col" style="padding-left: 50px;">View Data</th>
                         </tr>
@@ -641,9 +652,30 @@
                         {% for transaction in transactions %}
                             <tr>
                                 <th scope="row" style="padding-left: 30px">{{ transaction.transaction_varchar_id }}</th>
-                                <td>{{ transaction.time }}</td>
+                                <td>{{ transaction.time|date:"D, d M Y H:i" }}</td>
                                 <td>{{ transaction.amount }}$</td>
                                 <td>{{ transaction.report.name }}</td>
+                                <td>
+                                    <p 
+                                            {% if transaction.risk_score > 0 and transaction.risk_score < 60 %}
+                                                style="color: #7fd87f; display: inline;"
+                                            {% endif %}
+                                            {% if transaction.risk_score >= 60 and transaction.risk_score < 80 %}
+                                                style="color: orange; display: inline;"
+                                            {% endif %}
+                                            {% if transaction.risk_score >= 80 %}
+                                                style="color: #ff0000; display: inline;"
+                                            {% endif %}
+
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"
+                                             fill="currentColor" class="bi bi-circle-fill" viewBox="0 0 16 16"
+                                        style="margin-right: -6px;padding-top: 3px;">
+                                            <circle cx="4" cy="4" r="4"/>
+                                        </svg>
+                                        {{ transaction.risk_score }}
+                                    </p>
+                                </td>
                                 {% if transaction.is_fraud == False %}
                                     <td>
                                         <p style="margin:0; font-size: 14px; border: 1px solid #90ee90; border-radius: 50px; text-align: left; background: #e6ffe6; color: #7fd87f;">
@@ -671,9 +703,10 @@
                                     </td>
                                 {% endif %}
                                 <td style="padding-left: 50px;">
-                                    <button class="view-data btn btn-outline-secondary btn-view" style="padding: 1px 5px; font-size: 14px;"
+                                    <button class="view-data btn btn-outline-secondary btn-view"
+                                            style="padding: 1px 5px; font-size: 14px;"
                                             data-id="{{ transaction.transaction_varchar_id }}"
-                                            data-time="{{ transaction.time }}"
+                                            data-time="{{ transaction.time|date:"D, d M Y H:i" }}"
                                             data-amount="{{ transaction.amount }}"
                                             data-report="{{ transaction.report.name }}"
                                             data-status="{% if transaction.is_fraud %}Fraudulent{% else %}Normal{% endif %}"
@@ -704,7 +737,9 @@
                                             data-v25="{{ transaction.v25 }}"
                                             data-v26="{{ transaction.v26 }}"
                                             data-v27="{{ transaction.v27 }}"
-                                            data-v28="{{ transaction.v28 }}">
+                                            data-v28="{{ transaction.v28 }}"
+                                            data-risk_score="{{ transaction.risk_score }}"
+                                            data-explanation="{{ transaction.explanation }}">
                                         View Data
                                     </button>
                                 </td>
@@ -722,7 +757,8 @@
                                        href="?page=1{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">First</a>
                                 </li>
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ transactions.previous_page_number }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Back</a>
+                                    <a class="page-link" href="?page=
+                                            {{ transactions.previous_page_number }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Back</a>
                                 </li>
                             {% endif %}
 
@@ -732,10 +768,12 @@
 
                             {% if transactions.has_next %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ transactions.next_page_number }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Forward</a>
+                                    <a class="page-link" href="?page=
+                                            {{ transactions.next_page_number }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Forward</a>
                                 </li>
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ transactions.paginator.num_pages }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Last</a>
+                                    <a class="page-link" href="?page=
+                                            {{ transactions.paginator.num_pages }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Last</a>
                                 </li>
                             {% endif %}
                         </ul>
@@ -978,6 +1016,8 @@
                 document.getElementById("modalTransactionV26").textContent = this.getAttribute("data-v26");
                 document.getElementById("modalTransactionV27").textContent = this.getAttribute("data-v27");
                 document.getElementById("modalTransactionV28").textContent = this.getAttribute("data-v28");
+                document.getElementById("modalTransactionRiskScore").textContent = this.getAttribute("data-risk_score");
+                document.getElementById("modalTransactionExplanation").textContent = this.getAttribute("data-explanation");
 
                 // Открываем модальное окно
                 let modal = new bootstrap.Modal(document.getElementById("transactionModal"));
@@ -988,6 +1028,12 @@
 </script>
 
 <script>
+    document.getElementById("id_csv_file").children[0].textContent = "";
+
+    document.getElementById("id_csv_file").addEventListener("change", function () {
+        const label = document.getElementById("fileLabel");
+        label.innerText = this.files.length > 0 ? this.files[0].name : "Upload CSV";
+    });
 
 </script>
 

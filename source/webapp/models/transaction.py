@@ -5,7 +5,7 @@ from webapp.models.report import Report
 
 class Transaction(models.Model):
     report = models.ForeignKey(Report, on_delete=models.CASCADE)  # Привязываем к отчету
-    time = models.FloatField()
+    time = models.DateTimeField()  # Храним реальную дату и время транзакции
     amount = models.FloatField()
     v1 = models.FloatField()
     v2 = models.FloatField()
@@ -36,12 +36,14 @@ class Transaction(models.Model):
     v27 = models.FloatField()
     v28 = models.FloatField()
     is_fraud = models.BooleanField(default=False)  # Флаг мошенничества
+    explanation = models.TextField()
     transaction_varchar_id = models.CharField(
         max_length=10,
         null=False,
         blank=False,
         verbose_name="Уникальный сгенерированный ID транзакции"
     )
+    risk_score = models.PositiveSmallIntegerField()
 
     def __str__(self):
         return f"Transaction {self.id} - Fraud: {self.is_fraud}"
