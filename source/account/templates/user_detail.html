@@ -631,13 +631,13 @@
                                 </button>
                                 <ul class="dropdown-menu">
                                     <li><a class="dropdown-item"
-                                           href="?{% if current_report_id %}report_id={{ current_report_id }}&{% endif %}is_fraud=&search={{ search_query }}">All</a>
+                                           href="?report_id={{ request.GET.report_id }}&is_fraud=&search={{ search_query }}">All</a>
                                     </li>
                                     <li><a class="dropdown-item"
-                                           href="?{% if current_report_id %}report_id={{ current_report_id }}&{% endif %}is_fraud=1&search={{ search_query }}">Fraudulent</a>
+                                           href="?report_id={{ request.GET.report_id }}&is_fraud=1&search={{ search_query }}">Fraudulent</a>
                                     </li>
                                     <li><a class="dropdown-item"
-                                           href="?{% if current_report_id %}report_id={{ current_report_id }}&{% endif %}is_fraud=0&search={{ search_query }}">Non-Fraudulent</a>
+                                           href="?report_id={{ request.GET.report_id }}&is_fraud=0&search={{ search_query }}">Non-Fraudulent</a>
                                     </li>
                                 </ul>
                             </div>
