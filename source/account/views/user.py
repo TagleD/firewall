@@ -3,6 +3,7 @@ import json
 import string
 import random
 
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Sum
 from django.views import View
@@ -67,6 +68,26 @@ def logout_view(request):
     logout(request)
     return redirect('index')
 
+
+KAZAKHSTAN_CITIES = [
+    (43.238949, 76.889709, "Almaty, Kazakhstan"),      # Алматы
+    (51.169392, 71.449074, "Astana, Kazakhstan"),      # Астана
+    (47.094495, 51.923993, "Atyrau, Kazakhstan"),      # Атырау
+    (50.286263, 57.167121, "Aktobe, Kazakhstan"),      # Актобе
+    (42.312735, 69.587993, "Shymkent, Kazakhstan"),    # Шымкент
+    (49.802063, 73.102086, "Karaganda, Kazakhstan"),   # Караганда
+    (45.000000, 78.400000, "Taldykorgan, Kazakhstan"), # Талдыкорган
+    (42.902641, 71.406930, "Taraz, Kazakhstan"),       # Тараз
+    (47.100000, 51.900000, "Atyrau, Kazakhstan"),      # Атырау
+    (51.723756, 75.315991, "Ekibastuz, Kazakhstan"),   # Экибастуз
+    (53.200000, 63.600000, "Kostanay, Kazakhstan"),    # Костанай
+    (44.848831, 65.482268, "Kyzylorda, Kazakhstan"),   # Кызылорда
+    (47.787863, 67.710307, "Zhezkazgan, Kazakhstan"),  # Жезказган
+    (52.288940, 76.973170, "Pavlodar, Kazakhstan"),    # Павлодар
+    (52.964381, 63.096894, "Rudny, Kazakhstan"),       # Рудный
+    (52.348910, 71.892645, "Stepnogorsk, Kazakhstan"), # Степногорск
+    (54.880880, 69.155785, "Petropavlovsk, Kazakhstan")# Петропавловск
+]
 
 class UserDetailView(LoginRequiredMixin, View):
     template_name = 'user_detail.html'
@@ -149,6 +170,7 @@ class UserDetailView(LoginRequiredMixin, View):
                         normal_amounts[i] += 1
                     break
 
+
         # Пагинация
         paginator = Paginator(transactions, self.paginate_by)
         page = request.GET.get('page')
@@ -230,6 +252,18 @@ class UserDetailView(LoginRequiredMixin, View):
 
                 transaction_time = BASE_DATE + timedelta(seconds=time)  # Считаем реальную дату
 
+                # Проверяем наличие координат
+                try:
+                    latitude = float(row[31]) if row[31] else None
+                    longitude = float(row[32]) if row[32] else None
+                    location = str(row[33]) if row[33] else None  # Исправлено: `string` → `str`
+                except (IndexError, ValueError):
+                    latitude, longitude, location = None, None, None
+
+                # Если координаты отсутствуют, выбираем случайный город Казахстана
+                if latitude is None or longitude is None or location is None:
+                    latitude, longitude, location = random.choice(KAZAKHSTAN_CITIES)  # Берем координаты
+
                 transaction = Transaction(
                     transaction_varchar_id=transaction_varchar_id,  # Формат AAA-000001
                     report=report,
@@ -245,6 +279,9 @@ class UserDetailView(LoginRequiredMixin, View):
                     is_fraud=is_fraud,
                     explanation=explanation,
                     risk_score=risk_score,
+                    latitude=latitude,
+                    longitude=longitude,
+                    location=location,
                 )
                 transactions.append(transaction)
                 print(f"Транзакция {count} обработана")

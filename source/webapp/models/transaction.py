@@ -44,6 +44,9 @@ class Transaction(models.Model):
         verbose_name="Уникальный сгенерированный ID транзакции"
     )
     risk_score = models.PositiveSmallIntegerField()
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+    location = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         return f"Transaction {self.id} - Fraud: {self.is_fraud}"

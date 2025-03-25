@@ -10,6 +10,8 @@
     <link href="{% static '/css/bootstrap.min.css' %}" rel="stylesheet">
     <link href="{% static 'css/dashboard.css' %}" rel="stylesheet">
 
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+
 </head>
 <body>
 
@@ -416,7 +418,6 @@
             </div>
 
             <!-- Модалка для данных транзакции -->
-            <!-- Модалка для данных транзакции -->
             <div class="modal fade" id="transactionModal" tabindex="-1" aria-labelledby="transactionModalLabel"
                  aria-hidden="true">
                 <div class="modal-dialog">
@@ -456,8 +457,15 @@
                                     <th>Explanation</th>
                                     <td id="modalTransactionExplanation"></td>
                                 </tr>
+                                <tr>
+                                    <th>Location</th>
+                                    <td id="modalTransactionLocation"></td>
+                                </tr>
                                 </tbody>
                             </table>
+
+                            <div id="transactionMap" style="width: 100%; height: 400px;"></div>
+
                             <h6 class="mt-3">V1 - V28 Data</h6>
                             <div class="table-responsive">
                                 <table class="table table-striped table-bordered">
@@ -642,6 +650,7 @@
                             <th scope="col" style="padding-left: 30px">Transaction ID</th>
                             <th scope="col">Date</th>
                             <th scope="col">Amount</th>
+                            <th scope="col">Location</th>
                             <th scope="col">Risk Score</th>
                             <th scope="col" style="text-align: center;">Status</th>
                             <th scope="col" style="padding-left: 50px;">View Data</th>
@@ -653,8 +662,9 @@
                                 <th scope="row" style="padding-left: 30px">{{ transaction.transaction_varchar_id }}</th>
                                 <td>{{ transaction.time|date:"D, d M Y H:i" }}</td>
                                 <td>{{ transaction.amount }}$</td>
+                                <td>{{ transaction.location }}</td>
                                 <td>
-                                    <p 
+                                    <p
                                             {% if transaction.risk_score > 0 and transaction.risk_score < 60 %}
                                                 style="color: #7fd87f; display: inline;"
                                             {% endif %}
@@ -668,7 +678,7 @@
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"
                                              fill="currentColor" class="bi bi-circle-fill" viewBox="0 0 16 16"
-                                        style="margin-right: -6px;padding-top: 3px;">
+                                             style="margin-right: -6px;padding-top: 3px;">
                                             <circle cx="4" cy="4" r="4"/>
                                         </svg>
                                         {{ transaction.risk_score }}
@@ -737,7 +747,11 @@
                                             data-v27="{{ transaction.v27 }}"
                                             data-v28="{{ transaction.v28 }}"
                                             data-risk_score="{{ transaction.risk_score }}"
-                                            data-explanation="{{ transaction.explanation }}">
+                                            data-explanation="{{ transaction.explanation }}"
+                                            data-latitude="{{ transaction.latitude }}"
+                                            data-longitude="{{ transaction.longitude }}"
+                                            data-location="{{ transaction.location }}"
+                                            >
                                         View Data
                                     </button>
                                 </td>
@@ -755,8 +769,7 @@
                                        href="?page=1{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">First</a>
                                 </li>
                                 <li class="page-item">
-                                    <a class="page-link" href="?page=
-                                            {{ transactions.previous_page_number }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Back</a>
+                                    <a class="page-link" href="?page={{ transactions.previous_page_number }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Back</a>
                                 </li>
                             {% endif %}
 
@@ -766,12 +779,10 @@
 
                             {% if transactions.has_next %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?page=
-                                            {{ transactions.next_page_number }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Forward</a>
+                                    <a class="page-link" href="?page={{ transactions.next_page_number }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Forward</a>
                                 </li>
                                 <li class="page-item">
-                                    <a class="page-link" href="?page=
-                                            {{ transactions.paginator.num_pages }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Last</a>
+                                    <a class="page-link" href="?page={{ transactions.paginator.num_pages }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Last</a>
                                 </li>
                             {% endif %}
                         </ul>
@@ -974,55 +985,60 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        let viewDataButtons = document.querySelectorAll(".view-data");
+    let viewDataButtons = document.querySelectorAll(".view-data");
 
-        viewDataButtons.forEach(button => {
-            button.addEventListener("click", function (event) {
-                event.preventDefault();
+    viewDataButtons.forEach(button => {
+        button.addEventListener("click", function (event) {
+            event.preventDefault();
 
-                // Получаем данные из атрибутов кнопки
-                document.getElementById("modalTransactionID").textContent = this.getAttribute("data-id");
-                document.getElementById("modalTransactionTime").textContent = this.getAttribute("data-time");
-                document.getElementById("modalTransactionAmount").textContent = this.getAttribute("data-amount");
-                document.getElementById("modalTransactionReport").textContent = this.getAttribute("data-report");
-                document.getElementById("modalTransactionStatus").textContent = this.getAttribute("data-status");
-                document.getElementById("modalTransactionV1").textContent = this.getAttribute("data-v1");
-                document.getElementById("modalTransactionV2").textContent = this.getAttribute("data-v2");
-                document.getElementById("modalTransactionV3").textContent = this.getAttribute("data-v3");
-                document.getElementById("modalTransactionV4").textContent = this.getAttribute("data-v4");
-                document.getElementById("modalTransactionV5").textContent = this.getAttribute("data-v5");
-                document.getElementById("modalTransactionV6").textContent = this.getAttribute("data-v6");
-                document.getElementById("modalTransactionV7").textContent = this.getAttribute("data-v7");
-                document.getElementById("modalTransactionV8").textContent = this.getAttribute("data-v8");
-                document.getElementById("modalTransactionV9").textContent = this.getAttribute("data-v9");
-                document.getElementById("modalTransactionV10").textContent = this.getAttribute("data-v10");
-                document.getElementById("modalTransactionV11").textContent = this.getAttribute("data-v11");
-                document.getElementById("modalTransactionV12").textContent = this.getAttribute("data-v12");
-                document.getElementById("modalTransactionV13").textContent = this.getAttribute("data-v13");
-                document.getElementById("modalTransactionV14").textContent = this.getAttribute("data-v14");
-                document.getElementById("modalTransactionV15").textContent = this.getAttribute("data-v15");
-                document.getElementById("modalTransactionV16").textContent = this.getAttribute("data-v16");
-                document.getElementById("modalTransactionV17").textContent = this.getAttribute("data-v17");
-                document.getElementById("modalTransactionV18").textContent = this.getAttribute("data-v18");
-                document.getElementById("modalTransactionV19").textContent = this.getAttribute("data-v19");
-                document.getElementById("modalTransactionV20").textContent = this.getAttribute("data-v20");
-                document.getElementById("modalTransactionV21").textContent = this.getAttribute("data-v21");
-                document.getElementById("modalTransactionV22").textContent = this.getAttribute("data-v22");
-                document.getElementById("modalTransactionV23").textContent = this.getAttribute("data-v23");
-                document.getElementById("modalTransactionV24").textContent = this.getAttribute("data-v24");
-                document.getElementById("modalTransactionV25").textContent = this.getAttribute("data-v25");
-                document.getElementById("modalTransactionV26").textContent = this.getAttribute("data-v26");
-                document.getElementById("modalTransactionV27").textContent = this.getAttribute("data-v27");
-                document.getElementById("modalTransactionV28").textContent = this.getAttribute("data-v28");
-                document.getElementById("modalTransactionRiskScore").textContent = this.getAttribute("data-risk_score");
-                document.getElementById("modalTransactionExplanation").textContent = this.getAttribute("data-explanation");
+            // Получаем данные из атрибутов кнопки
+            document.getElementById("modalTransactionID").textContent = this.getAttribute("data-id");
+            document.getElementById("modalTransactionTime").textContent = this.getAttribute("data-time");
+            document.getElementById("modalTransactionAmount").textContent = this.getAttribute("data-amount");
+            document.getElementById("modalTransactionReport").textContent = this.getAttribute("data-report");
+            document.getElementById("modalTransactionStatus").textContent = this.getAttribute("data-status");
+            document.getElementById("modalTransactionRiskScore").textContent = this.getAttribute("data-risk_score");
+            document.getElementById("modalTransactionExplanation").textContent = this.getAttribute("data-explanation");
+            document.getElementById("modalTransactionLocation").textContent = this.getAttribute("data-location");
 
-                // Открываем модальное окно
-                let modal = new bootstrap.Modal(document.getElementById("transactionModal"));
-                modal.show();
+            // Заполняем V1-V28 (можно упростить циклом)
+            for (let i = 1; i <= 28; i++) {
+                document.getElementById(`modalTransactionV${i}`).textContent = this.getAttribute(`data-v${i}`);
+            }
+
+            // Получаем координаты транзакции
+            let latitude = parseFloat(this.getAttribute("data-latitude")) || 43.238949; // Москва по умолчанию
+            let longitude = parseFloat(this.getAttribute("data-longitude")) || 76.889709;
+
+            // Удаляем старую карту, если есть
+            let mapContainer = document.getElementById("transactionMap");
+            mapContainer.innerHTML = ""; // Чистим контейнер перед созданием новой карты
+            let newMapDiv = document.createElement("div");
+            newMapDiv.id = "transactionMapInner";
+            newMapDiv.style.width = "100%";
+            newMapDiv.style.height = "400px";
+            mapContainer.appendChild(newMapDiv);
+
+            // Инициализируем карту
+            ymaps.ready(function () {
+                let map = new ymaps.Map("transactionMapInner", {
+                    center: [latitude, longitude],
+                    zoom: 12
+                });
+
+                let placemark = new ymaps.Placemark([latitude, longitude], {
+                    balloonContent: `Транзакция ID: ${button.getAttribute("data-id")}<br>Время: ${button.getAttribute("data-time")}`
+                });
+
+                map.geoObjects.add(placemark);
             });
+
+            // Открываем модальное окно
+            let modal = new bootstrap.Modal(document.getElementById("transactionModal"));
+            modal.show();
         });
     });
+});
 </script>
 
 <script>
