@@ -2,75 +2,70 @@
 {% load i18n %}
 
 {% block content %}
+    <div class="container main-container">
+        <div class="row d-flex justify-content-center">
+            <div class="col-5 card text-bg-light form-margins" style="padding: 15px; margin-top: 15%;">
+                <h3>Registration form</h3>
 
-    <div class="container mt-200">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="contact-form" data-aos="fade-up" data-aos-delay="300">
-                    <h3>Registration form</h3>
-
-                    <!-- Display form errors if any -->
-                    {% if form.errors %}
-                        <div class="alert alert-danger">
-                            <ul>
-                                {% for field, errors in form.errors.items %}
-                                    {% for error in errors %}
-                                        <li>{{ error }}</li>
-                                    {% endfor %}
+                <!-- Display form errors if any -->
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <ul>
+                            {% for field, errors in form.errors.items %}
+                                {% for error in errors %}
+                                    <li>{{ error }}</li>
                                 {% endfor %}
-                            </ul>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                <form method="post" action="{% url 'register' %}" data-aos="fade-up"
+                      data-aos-delay="200">
+                    {% csrf_token %}
+                    <div class="row gy-4">
+
+                        <div class="col-12">
+                            {{ form.username }}
                         </div>
-                    {% endif %}
 
-                    <form method="post" action="{% url 'register' %}" data-aos="fade-up"
-                          data-aos-delay="200">
-                        {% csrf_token %}
-                        <div class="row gy-4">
+                        <div class="col-12">
+                            {{ form.first_name }}
+                        </div>
 
-                            <div class="col-md-6">
-                                {{ form.username }}
-                            </div>
+                        <div class="col-12">
+                            {{ form.last_name }}
+                        </div>
 
-                            <div class="col-md-6 ">
-                                {{ form.first_name }}
-                            </div>
+                        <div class="col-12">
+                            {{ form.email }}
+                        </div>
 
-                            <div class="col-md-6">
-                                {{ form.last_name }}
-                            </div>
+                        <div class="col-12">
+                            {{ form.password }}
+                        </div>
 
-                            <div class="col-md-6">
-                                {{ form.email }}
-                            </div>
+                        <div class="col-12">
+                            {{ form.password_confirm }}
+                        </div>
 
-                            <div class="col-md-6">
-                                {{ form.password }}
-                            </div>
-
-                            <div class="col-md-6">
-                                {{ form.password_confirm }}
-                            </div>
-
-                            <div class="col-12">
-                                <button type="submit" class="btn btn-round btn-primary me-0 me-sm-2 mx-1">Register
-                                </button>
-                                <div class="d-inline-block">
-                                    <h5>
-                                        Already have an account?
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-round btn-primary me-0 me-sm-2 mx-1">Register
+                            </button>
+                            <div class="d-inline-block">
+                                <h5>
+                                    Already have an account?
                                     <a class="btn btn-round btn-success me-0 me-sm-2 mx-1"
                                        href="{% url 'login' %}">Login</a>
-                                    </h5>
-                                </div>
+                                </h5>
                             </div>
-
-
                         </div>
-                    </form>
 
-                </div>
+
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-
-
+    
 {% endblock %}
