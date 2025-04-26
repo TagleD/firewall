@@ -79,9 +79,9 @@ WSGI_APPLICATION = 'core.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'analisator',
-        'USER': 'analisator',
-        'PASSWORD': 'analisator',
+        'NAME': 'firewall',
+        'USER': 'firewall_user',
+        'PASSWORD': 'firewall_password',
         'HOST': '185.22.67.9',
         'PORT': '5432',
     }
