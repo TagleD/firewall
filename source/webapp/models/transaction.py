@@ -6,7 +6,6 @@ from webapp.models.report import Report
 class Transaction(models.Model):
     report = models.ForeignKey(Report, on_delete=models.CASCADE)  # Привязываем к отчету
     time = models.DateTimeField()  # Храним реальную дату и время транзакции
-    amount = models.FloatField()
     v1 = models.FloatField()
     v2 = models.FloatField()
     v3 = models.FloatField()
@@ -37,16 +36,24 @@ class Transaction(models.Model):
     v28 = models.FloatField()
     is_fraud = models.BooleanField(default=False)  # Флаг мошенничества
     explanation = models.TextField()
-    transaction_varchar_id = models.CharField(
+    connect_varchar_id = models.CharField(
         max_length=10,
         null=False,
         blank=False,
-        verbose_name="Уникальный сгенерированный ID транзакции"
+        verbose_name="Уникальный сгенерированный ID"
     )
     risk_score = models.PositiveSmallIntegerField()
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     location = models.CharField(max_length=255, null=True, blank=True)
+    ip_address = models.CharField(
+        null=True,
+        blank=True
+    )
+    port = models.IntegerField(null=True, blank=True)
+    bytes = models.IntegerField(null=True, blank=True)
+    connection_time = models.IntegerField(null=True, blank=True)
+    protocol = models.CharField(null=True, blank=True)
 
     def __str__(self):
-        return f"Transaction {self.id} - Fraud: {self.is_fraud}"
+        return f"{self.id} - Fraud: {self.is_fraud}"

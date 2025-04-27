@@ -25,17 +25,15 @@ class TransactionAdmin(admin.ModelAdmin):
         'id',
         'report',
         'time',
-        'amount',
         'is_fraud',
         'explanation',
-        'transaction_varchar_id',
+        'connect_varchar_id',
     )
     list_display_links = (
         'id',
         'report',
         'time',
-        'amount',
         'is_fraud',
         'explanation',
-        'transaction_varchar_id',
+        'connect_varchar_id',
     )

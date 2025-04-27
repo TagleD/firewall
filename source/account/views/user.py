@@ -2,7 +2,7 @@ import csv
 import json
 import string
 import random
-
+from ipaddress import ip_address
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Sum
@@ -108,7 +108,7 @@ class UserDetailView(LoginRequiredMixin, View):
         transactions = Transaction.objects.filter(report__user=user)
 
         if search_query:
-            transactions = transactions.filter(transaction_varchar_id__icontains=search_query)
+            transactions = transactions.filter(connect_varchar_id__icontains=search_query)
 
         if is_fraud == "1":
             transactions = transactions.filter(is_fraud=True)
@@ -123,8 +123,8 @@ class UserDetailView(LoginRequiredMixin, View):
                 transactions = Transaction.objects.none()
 
         # Подсчет общей стоимости мошеннических операций
-        fraud_total_amount = transactions.filter(is_fraud=True).aggregate(total_amount=Sum("amount"))["total_amount"]
-        fraud_total_amount = round(fraud_total_amount or 0, 1)
+        # fraud_total_amount = transactions.filter(is_fraud=True).aggregate(total_amount=Sum("amount"))["total_amount"]
+        # fraud_total_amount = round(fraud_total_amount or 0, 1)
 
         # Подсчет данных для инфографики
         total_count = transactions.count()  # Общее количество
@@ -161,14 +161,14 @@ class UserDetailView(LoginRequiredMixin, View):
         # Вычисляем разницу с текущим процентом
         fraud_percentage_change = round(fraud_percentage - fraud_percentage_without_last, 2)
 
-        for t in transactions:
-            for i in range(len(amount_bins) - 1):
-                if amount_bins[i] <= t.amount < amount_bins[i + 1]:
-                    if t.is_fraud:
-                        fraud_amounts[i] += 1
-                    else:
-                        normal_amounts[i] += 1
-                    break
+        # for t in transactions:
+        #     for i in range(len(amount_bins) - 1):
+        #         if amount_bins[i] <= t.amount < amount_bins[i + 1]:
+        #             if t.is_fraud:
+        #                 fraud_amounts[i] += 1
+        #             else:
+        #                 normal_amounts[i] += 1
+        #             break
 
 
         # Пагинация
@@ -200,9 +200,9 @@ class UserDetailView(LoginRequiredMixin, View):
         new_fraud_transactions_count = new_transactions.filter(is_fraud=True).count()
 
         # Подсчет общей стоимости мошеннических операций в последнем отчете
-        new_fraud_total_amount = new_transactions.filter(is_fraud=True).aggregate(total_amount=Sum("amount"))[
-            "total_amount"]
-        new_fraud_total_amount = round(new_fraud_total_amount or 0, 1)
+        # new_fraud_total_amount = new_transactions.filter(is_fraud=True).aggregate(total_amount=Sum("amount"))[
+        #     "total_amount"]
+        # new_fraud_total_amount = round(new_fraud_total_amount or 0, 1)
 
         return render(request, self.template_name, {
             "user_obj": user,
@@ -218,10 +218,10 @@ class UserDetailView(LoginRequiredMixin, View):
             "amount_bins": json.dumps(amount_ranges),
             "normal_amounts": json.dumps(normal_amounts),
             "fraud_amounts": json.dumps(fraud_amounts),
-            "fraud_total_amount": fraud_total_amount,
+            # "fraud_total_amount": fraud_total_amount,
             "new_transactions_count": new_transactions_count,
             "new_fraud_transactions_count" : new_fraud_transactions_count,
-            "new_fraud_total_amount": new_fraud_total_amount,
+            # "new_fraud_total_amount": new_fraud_total_amount,
             "fraud_percentage_change": fraud_percentage_change,
             "search_query": search_query,
         })
@@ -245,18 +245,18 @@ class UserDetailView(LoginRequiredMixin, View):
             transactions = []
             count = 1
             for row in reader:
-                time, amount = float(row[0]), float(row[29])
+                time = float(row[0])
                 features = list(map(float, row[1:29]))  # V1 - V28
                 is_fraud, risk_score, explanation = predict_anomaly(features)  # Анализируем транзакцию
-                transaction_varchar_id = f"{prefix}-{count:06d}"
+                connect_varchar_id = f"{prefix}-{count:06d}"
 
                 transaction_time = BASE_DATE + timedelta(seconds=time)  # Считаем реальную дату
 
                 # Проверяем наличие координат
                 try:
-                    latitude = float(row[31]) if row[31] else None
-                    longitude = float(row[32]) if row[32] else None
-                    location = str(row[33]) if row[33] else None  # Исправлено: `string` → `str`
+                    latitude = float(row[29]) if row[29] else None
+                    longitude = float(row[30]) if row[30] else None
+                    location = str(row[31]) if row[31] else None  # Исправлено: `string` → `str`
                 except (IndexError, ValueError):
                     latitude, longitude, location = None, None, None
 
@@ -264,11 +264,40 @@ class UserDetailView(LoginRequiredMixin, View):
                 if latitude is None or longitude is None or location is None:
                     latitude, longitude, location = random.choice(KAZAKHSTAN_CITIES)  # Берем координаты
 
+                # IP
+                try:
+                    ip = str(row[32]) if row[32] else None
+                except (IndexError, ValueError):
+                    ip = None
+
+                # PORT
+                try:
+                    port = int(row[33]) if row[33] else None
+                except (IndexError, ValueError):
+                    port = None
+
+                # BYTES
+                try:
+                    bytes_number = int(row[34]) if row[34] else 0  # bytes по умолчанию 0
+                except (IndexError, ValueError):
+                    bytes_number = 0
+
+                # CONNECTION TIME
+                try:
+                    connection_time = int(row[35]) if row[35] else None
+                except (IndexError, ValueError):
+                    connection_time = None
+
+                # PROTOCOL
+                try:
+                    protocol = row[36] if row[36] else None
+                except (IndexError, ValueError):
+                    protocol = None
+
                 transaction = Transaction(
-                    transaction_varchar_id=transaction_varchar_id,  # Формат AAA-000001
+                    connect_varchar_id=connect_varchar_id,  # Формат AAA-000001
                     report=report,
                     time=transaction_time,
-                    amount=amount,
                     v1=features[0], v2=features[1], v3=features[2], v4=features[3],
                     v5=features[4], v6=features[5], v7=features[6], v8=features[7],
                     v9=features[8], v10=features[9], v11=features[10], v12=features[11],
@@ -282,6 +311,11 @@ class UserDetailView(LoginRequiredMixin, View):
                     latitude=latitude,
                     longitude=longitude,
                     location=location,
+                    ip_address=ip,
+                    port=port,
+                    bytes=bytes_number,
+                    connection_time=connection_time,
+                    protocol=protocol,
                 )
                 transactions.append(transaction)
                 print(f"Транзакция {count} обработана")
