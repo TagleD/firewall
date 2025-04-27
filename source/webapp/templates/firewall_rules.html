@@ -9,6 +9,16 @@
     <link href="{% static 'css/dashboard.css' %}" rel="stylesheet">
     <link href="{% static 'css/firewall_styles.css' %}" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        h5, p {
+            color:  #ffffff !important;
+        }
+        
+        .text-wheat {
+            color: wheat !important;
+        }
+    </style>
 </head>
 <body>
 
@@ -16,7 +26,7 @@
     <aside class="sidebar">
         <ul class="sidebar-nav">
             <li><a href="{% url 'user_detail' request.user.pk %}" class="">Dashboard</a></li>
-            <li><a href="#">Users</a></li>
+            <li><a href="{% url 'user_statistics' %}">User Statistics</a></li>
             <li><a href="{% url 'firewall_rules' %}" class="active">Firewall Rules</a></li>
             <li><a href="{% url 'user_settings' user.pk %}">Settings</a></li>
             <li><a href="{% url 'logout' %}">Logout</a></li>
@@ -26,30 +36,37 @@
     <div class="main-content">
         <div class="container my-5">
             <h1 class="text-center mb-4">Firewall Rules Documentation</h1>
-            <p class="lead text-center">Explore the generated firewall rules, understand their purpose, and learn how
-                they
-                protect your network.</p>
+            <p class="lead text-center">
+                Learn about the AI-generated firewall rules, their purpose, the attack methods they prevent,
+                and best practices for securing your network against evolving threats.
+            </p>
         </div>
 
         <div class="container my-5">
             <h2 class="mb-4">Rule Categories</h2>
             <div class="row">
-                <div class="col-md-4 mb-3">
+                <div class="col-md-3 mb-3">
                     <div class="card p-3">
                         <h5>Incoming Traffic Rules</h5>
-                        <p>Rules that control external connections trying to access your network.</p>
+                        <p class="text-wheat">Restrict unauthorized access to internal services.</p>
                     </div>
                 </div>
-                <div class="col-md-4 mb-3">
+                <div class="col-md-3 mb-3">
                     <div class="card p-3">
                         <h5>Outgoing Traffic Rules</h5>
-                        <p>Rules that regulate how your internal systems connect to the outside world.</p>
+                        <p class="text-wheat">Prevent devices from communicating with malicious servers.</p>
                     </div>
                 </div>
-                <div class="col-md-4 mb-3">
+                <div class="col-md-3 mb-3">
                     <div class="card p-3">
-                        <h5>Suspicious Activity Detection</h5>
-                        <p>Automatically generated rules to block or flag abnormal behavior.</p>
+                        <h5>Internal Traffic Rules</h5>
+                        <p class="text-wheat">Monitor and control lateral movement inside the network.</p>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card p-3">
+                        <h5>Anomaly Detection Rules</h5>
+                        <p class="text-wheat">Identify and react to unexpected behavior patterns.</p>
                     </div>
                 </div>
             </div>
@@ -60,52 +77,83 @@
 
             <div class="card p-3 mb-3">
                 <h5>Rule: Block Incoming SSH from Unknown IPs</h5>
-                <p><strong>Description:</strong> Prevent brute-force attacks by disallowing SSH access from unauthorized
-                    sources.</p>
-                <p><strong>Why attackers do this:</strong> Brute-forcing SSH credentials can give full server control.
-                </p>
-                <p><strong>Expert tip:</strong> Always limit SSH access by IP and use key-based authentication.</p>
+                <p><strong>Description:</strong> Prevent brute-force SSH attacks.</p>
+                <p><strong>Why attackers do this:</strong> To gain remote control of servers.</p>
+                <p><strong>Expert tip:</strong> Use key-based authentication, not passwords.</p>
             </div>
 
             <div class="card p-3 mb-3">
-                <h5>Rule: Allow HTTPS (Port 443) Only</h5>
-                <p><strong>Description:</strong> Allow only encrypted HTTPS traffic, blocking insecure HTTP.</p>
-                <p><strong>Why attackers do this:</strong> Intercepting HTTP can expose sensitive user data.</p>
-                <p><strong>Expert tip:</strong> Redirect all HTTP to HTTPS using server settings or a firewall rule.</p>
+                <h5>Rule: Allow Only HTTPS (Port 443)</h5>
+                <p><strong>Description:</strong> Enforce encrypted traffic only.</p>
+                <p><strong>Why attackers do this:</strong> Steal credentials via HTTP.</p>
+                <p><strong>Expert tip:</strong> Set HSTS (HTTP Strict Transport Security) headers.</p>
             </div>
 
             <div class="card p-3 mb-3">
-                <h5>Rule: Block Outbound Connections to Malicious Domains</h5>
-                <p><strong>Description:</strong> Prevent compromised devices inside your network from contacting malware
-                    servers.</p>
-                <p><strong>Why attackers do this:</strong> Malware often phones home to receive commands or exfiltrate
-                    data.
-                </p>
-                <p><strong>Expert tip:</strong> Update blocklists daily and monitor DNS traffic for anomalies.</p>
+                <h5>Rule: Block Outbound DNS Tunneling Attempts</h5>
+                <p><strong>Description:</strong> Stop data exfiltration via DNS queries.</p>
+                <p><strong>Why attackers do this:</strong> Bypass firewall policies using DNS.</p>
+                <p><strong>Expert tip:</strong> Allow DNS only to trusted servers and inspect queries.</p>
+            </div>
+
+            <div class="card p-3 mb-3">
+                <h5>Rule: Block SMB Traffic Across Subnets</h5>
+                <p><strong>Description:</strong> Prevent lateral movement using SMB (Windows file sharing).</p>
+                <p><strong>Why attackers do this:</strong> Spread ransomware across machines.</p>
+                <p><strong>Expert tip:</strong> Disable SMBv1 completely and restrict SMB to internal segments only.</p>
+            </div>
+
+            <div class="card p-3 mb-3">
+                <h5>Rule: Detect Unusual Outbound Traffic Volume</h5>
+                <p><strong>Description:</strong> Identify machines potentially leaking data.</p>
+                <p><strong>Why attackers do this:</strong> Steal large datasets unnoticed.</p>
+                <p><strong>Expert tip:</strong> Implement network data loss prevention (DLP) solutions.</p>
+            </div>
+
+            <div class="card p-3 mb-3">
+                <h5>Rule: Block High-Risk Countries' IP Ranges</h5>
+                <p><strong>Description:</strong> Block traffic from geographies often linked to cyber attacks.</p>
+                <p><strong>Why attackers do this:</strong> Operate from jurisdictions difficult to reach legally.</p>
+                <p><strong>Expert tip:</strong> Use geofencing cautiously to avoid false positives.</p>
             </div>
         </div>
 
         <div class="container my-5">
             <h2 class="mb-4">How the AI Generates Rules</h2>
-            <p>The AI analyzes network behavior patterns, detects anomalies, and automatically proposes firewall rules
-                based
-                on observed threats. The goal is to dynamically adapt protection without requiring manual rule
-                creation.</p>
+            <p class="text-wheat">The AI-based firewall rule generator continuously analyzes network traffic patterns to identify anomalies
+                and evolving threats. Based on behavior analysis, the AI automatically proposes adaptive firewall rules
+                without requiring manual intervention.</p>
 
+            <h5>Key Techniques Used:</h5>
             <ul>
-                <li>✅ Detects brute-force login attempts</li>
-                <li>✅ Identifies data exfiltration patterns</li>
-                <li>✅ Flags unusual traffic volume or destinations</li>
-                <li>✅ Suggests rules based on threat intelligence feeds</li>
+                <li>Behavioral analysis of connection patterns</li>
+                <li>Threat intelligence feed integration</li>
+                <li>Machine learning anomaly detection models</li>
+                <li>Automated response recommendation engine</li>
+            </ul>
+
+            <h5>AI Focus Areas:</h5>
+            <ul>
+                <li>✅ Unusual port scanning activities</li>
+                <li>✅ Suspicious data transfer volumes</li>
+                <li>✅ Unauthorized protocol usage</li>
+                <li>✅ Unexpected geolocation of connections</li>
             </ul>
         </div>
 
-        <div class="container my-5 text-center">
-            <h5>Want to know more about network security?</h5>
-            <a href="#" class="btn btn-primary mt-2">Read Our Security Guidelines</a>
+        <div class="container my-5">
+            <h2 class="mb-4">Security Best Practices</h2>
+            <ul>
+                <li>✅ Apply the principle of least privilege to all firewall rules.</li>
+                <li>✅ Review and update rules regularly based on threat landscape changes.</li>
+                <li>✅ Monitor network logs continuously for unauthorized access attempts.</li>
+                <li>✅ Segment your network to minimize the impact of any compromise.</li>
+                <li>✅ Combine firewall protection with endpoint detection and response (EDR) solutions.</li>
+                <li>✅ Ensure firewall logging is enabled and properly backed up.</li>
+            </ul>
         </div>
     </div>
-    
+
 </div>
 {# End of new dashborad #}
 

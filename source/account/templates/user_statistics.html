@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Firewall Rules</title>
+    {% load static %}
+
+    <link href="{% static '/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/dashboard.css' %}" rel="stylesheet">
+    <link href="{% static 'css/firewall_styles.css' %}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        h5, p {
+            color: #ffffff !important;
+        }
+
+        .text-wheat {
+            color: wheat !important;
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard">
+    <aside class="sidebar">
+        <ul class="sidebar-nav">
+            <li><a href="{% url 'user_detail' request.user.pk %}" class="">Dashboard</a></li>
+            <li><a href="{% url 'user_statistics' %}">User Statistics</a></li>
+            <li><a href="{% url 'firewall_rules' %}">Firewall Rules</a></li>
+            <li><a href="{% url 'user_settings' user.pk %}">Settings</a></li>
+            <li><a href="{% url 'logout' %}">Logout</a></li>
+        </ul>
+    </aside>
+
+    <div class="main-content">
+        <h1 class="text-center mb-4">Users Firewall Statistics</h1>
+
+        <div class="row">
+            {% for item in users_data %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card p-3 dashboard-cards" style="height: 100%;">
+                        <h5 class="card-title">{{ item.user.username }}</h5>
+
+                        <div class="card mt-3">
+                            <div class="card-title">Total Connections</div>
+                            <div class="card-value">
+                                {{ item.total_count }}
+                            </div>
+                        </div>
+
+                        <div class="card mt-3">
+                            <div class="card-title">Malicious Connections</div>
+                            <div class="card-value red-text">
+                                {{ item.fraud_count }}
+                            </div>
+                        </div>
+
+                        <div class="card mt-3">
+                            <div class="card-title">Malicious Rate</div>
+                            <div class="card-value secondary-text">
+                                {{ item.fraud_percentage }}%
+                            </div>
+                        </div>
+
+                        <div class="card mt-3">
+                            <div class="card-title">Most Popular Location</div>
+                            <div class="card-value light-text">
+                                {{ item.popular_location }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-center">No users found.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+{# End of new dashborad #}
+
+
+</body>
+</html>

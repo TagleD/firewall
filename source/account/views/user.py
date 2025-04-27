@@ -5,7 +5,7 @@ import random
 from ipaddress import ip_address
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Sum
+from django.db.models import Sum, Count
 from django.views import View
 from datetime import timedelta, datetime
 from django.views.generic import TemplateView, CreateView, UpdateView
@@ -20,7 +20,6 @@ from account.forms import LoginForm, CustomUserCreationForm, UserForm, UserSetti
 from webapp.forms import CSVUploadForm
 from webapp.models import Report, Transaction
 from webapp.utils import predict_anomaly
-
 
 BASE_DATE = make_aware(datetime(2024, 9, 1, 0, 0, 0))  # 1 сентября 2024, 00:00:00 UTC
 
@@ -70,24 +69,25 @@ def logout_view(request):
 
 
 KAZAKHSTAN_CITIES = [
-    (43.238949, 76.889709, "Almaty, Kazakhstan"),      # Алматы
-    (51.169392, 71.449074, "Astana, Kazakhstan"),      # Астана
-    (47.094495, 51.923993, "Atyrau, Kazakhstan"),      # Атырау
-    (50.286263, 57.167121, "Aktobe, Kazakhstan"),      # Актобе
-    (42.312735, 69.587993, "Shymkent, Kazakhstan"),    # Шымкент
-    (49.802063, 73.102086, "Karaganda, Kazakhstan"),   # Караганда
-    (45.000000, 78.400000, "Taldykorgan, Kazakhstan"), # Талдыкорган
-    (42.902641, 71.406930, "Taraz, Kazakhstan"),       # Тараз
-    (47.100000, 51.900000, "Atyrau, Kazakhstan"),      # Атырау
-    (51.723756, 75.315991, "Ekibastuz, Kazakhstan"),   # Экибастуз
-    (53.200000, 63.600000, "Kostanay, Kazakhstan"),    # Костанай
-    (44.848831, 65.482268, "Kyzylorda, Kazakhstan"),   # Кызылорда
+    (43.238949, 76.889709, "Almaty, Kazakhstan"),  # Алматы
+    (51.169392, 71.449074, "Astana, Kazakhstan"),  # Астана
+    (47.094495, 51.923993, "Atyrau, Kazakhstan"),  # Атырау
+    (50.286263, 57.167121, "Aktobe, Kazakhstan"),  # Актобе
+    (42.312735, 69.587993, "Shymkent, Kazakhstan"),  # Шымкент
+    (49.802063, 73.102086, "Karaganda, Kazakhstan"),  # Караганда
+    (45.000000, 78.400000, "Taldykorgan, Kazakhstan"),  # Талдыкорган
+    (42.902641, 71.406930, "Taraz, Kazakhstan"),  # Тараз
+    (47.100000, 51.900000, "Atyrau, Kazakhstan"),  # Атырау
+    (51.723756, 75.315991, "Ekibastuz, Kazakhstan"),  # Экибастуз
+    (53.200000, 63.600000, "Kostanay, Kazakhstan"),  # Костанай
+    (44.848831, 65.482268, "Kyzylorda, Kazakhstan"),  # Кызылорда
     (47.787863, 67.710307, "Zhezkazgan, Kazakhstan"),  # Жезказган
-    (52.288940, 76.973170, "Pavlodar, Kazakhstan"),    # Павлодар
-    (52.964381, 63.096894, "Rudny, Kazakhstan"),       # Рудный
-    (52.348910, 71.892645, "Stepnogorsk, Kazakhstan"), # Степногорск
-    (54.880880, 69.155785, "Petropavlovsk, Kazakhstan")# Петропавловск
+    (52.288940, 76.973170, "Pavlodar, Kazakhstan"),  # Павлодар
+    (52.964381, 63.096894, "Rudny, Kazakhstan"),  # Рудный
+    (52.348910, 71.892645, "Stepnogorsk, Kazakhstan"),  # Степногорск
+    (54.880880, 69.155785, "Petropavlovsk, Kazakhstan")  # Петропавловск
 ]
+
 
 class UserDetailView(LoginRequiredMixin, View):
     template_name = 'dashboard.html'
@@ -170,7 +170,6 @@ class UserDetailView(LoginRequiredMixin, View):
         #                 normal_amounts[i] += 1
         #             break
 
-
         # Пагинация
         paginator = Paginator(transactions, self.paginate_by)
         page = request.GET.get('page')
@@ -220,7 +219,7 @@ class UserDetailView(LoginRequiredMixin, View):
             "fraud_amounts": json.dumps(fraud_amounts),
             # "fraud_total_amount": fraud_total_amount,
             "new_transactions_count": new_transactions_count,
-            "new_fraud_transactions_count" : new_fraud_transactions_count,
+            "new_fraud_transactions_count": new_fraud_transactions_count,
             # "new_fraud_total_amount": new_fraud_total_amount,
             "fraud_percentage_change": fraud_percentage_change,
             "search_query": search_query,
@@ -337,3 +336,39 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
     def get_success_url(self):
         return reverse('user_detail', kwargs={'pk': self.object.pk})
 
+
+class UsersStatistics(LoginRequiredMixin, View):
+    template_name = 'user_statistics.html'
+
+    def get(self, request):
+        User = get_user_model()
+        users = User.objects.all()
+
+        users_data = []
+
+        for user in users:
+            reports = Report.objects.filter(user=user)
+            transactions = Transaction.objects.filter(report__user=user)
+
+            total_count = transactions.count()
+            fraud_count = transactions.filter(is_fraud=True).count()
+            non_fraud_count = total_count - fraud_count
+            fraud_percentage = round((fraud_count / total_count * 100), 2) if total_count > 0 else 0
+
+            # Самое популярное место по транзакциям
+            popular_location = transactions.values('location').annotate(loc_count=Count('id')).order_by(
+                '-loc_count').first()
+            if popular_location:
+                popular_location = popular_location['location']
+            else:
+                popular_location = "Unknown"
+
+            users_data.append({
+                'user': user,
+                'total_count': total_count,
+                'fraud_count': fraud_count,
+                'fraud_percentage': fraud_percentage,
+                'popular_location': popular_location,
+            })
+
+        return render(request, self.template_name, {'users_data': users_data})
