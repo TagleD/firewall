@@ -90,7 +90,7 @@ KAZAKHSTAN_CITIES = [
 ]
 
 class UserDetailView(LoginRequiredMixin, View):
-    template_name = 'user_detail.html'
+    template_name = 'dashboard.html'
     paginate_by = 50  # Количество записей на страницу
 
     def get(self, request, pk):

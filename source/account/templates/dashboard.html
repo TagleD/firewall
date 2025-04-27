@@ -21,7 +21,7 @@
         <ul class="sidebar-nav">
             <li><a href="#" class="active">Dashboard</a></li>
             <li><a href="#">Users</a></li>
-            <li><a href="#">Firewall Rules</a></li>
+            <li><a href="{% url 'firewall_rules' %}">Firewall Rules</a></li>
             <li><a href="{% url 'user_settings' user.pk %}">Settings</a></li>
             <li><a href="{% url 'logout' %}">Logout</a></li>
         </ul>
@@ -306,41 +306,67 @@
                 {% else %}
                     <h2>Connections of all reports</h2>
                 {% endif %}
-                <h6 class="card-subtitle mb-2 text-body-secondary" style="margin-left: 3px;">
-                    Review and investigate potentially fraudulent transactions
+                <h6 class="card-subtitle mb-2 text-body-secondary" style="margin-left: 3px; color: wheat !important;">
+                    Analyze and detect potentially malicious network connections.
                 </h6>
 
                 <div class="row" style="margin-top: 25px;">
-                    <div class="col-10">
-                        <input class="form-control" list="datalistOptions" id="searchInput"
+                    <div class="col-6">
+                        <input class="form-control" list="datalistOptions" id="searchInput" style="height: 50px;"
                                placeholder="Search connections by ID">
                     </div>
-                    <div class="col-2">
-                        <div class="dropdown">
-                            <button class="btn btn-outline-secondary dropdown-toggle" type="button"
-                                    data-bs-toggle="dropdown"
-                                    aria-expanded="false">
-                                {% if current_is_fraud == "1" %}
-                                    Malicious
-                                {% elif current_is_fraud == "0" %}
-                                    Safe
-                                {% else %}
-                                    Connection Filter
-                                {% endif %}
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item"
-                                       href="?report_id={{ request.GET.report_id }}&is_fraud=&search={{ search_query }}">All</a>
-                                </li>
-                                <li><a class="dropdown-item"
-                                       href="?report_id={{ request.GET.report_id }}&is_fraud=1&search={{ search_query }}">Malicious</a>
-                                </li>
-                                <li><a class="dropdown-item"
-                                       href="?report_id={{ request.GET.report_id }}&is_fraud=0&search={{ search_query }}">Safe</a>
-                                </li>
-                            </ul>
+                    <div class="col-3">
+                        <div style="display: flex">
+                            <div class="dropdown">
+                                <button class="btn btn-warning dropdown-toggle" type="button"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false">
+                                    {% if report %}
+                                        {{ report.name }}
+                                    {% else %}
+                                        Filter by Report
+                                    {% endif %}
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item"
+                                           href="?is_fraud={{ current_is_fraud }}&search={{ search_query }}">All
+                                        Reports</a></li>
+                                    {% for rep in reports %}
+                                        <li><a class="dropdown-item"
+                                               href="?report_id={{ rep.id }}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">
+                                            {{ rep.name }}
+                                        </a></li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+
+                            <div class="dropdown" style="display: inline-block; margin-left: 20px;">
+                                <button class="btn btn-secondary dropdown-toggle" type="button"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false">
+                                    {% if current_is_fraud == "1" %}
+                                        Malicious
+                                    {% elif current_is_fraud == "0" %}
+                                        Safe
+                                    {% else %}
+                                        Connection Filter
+                                    {% endif %}
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item"
+                                           href="?report_id={{ request.GET.report_id }}&is_fraud=&search={{ search_query }}">All</a>
+                                    </li>
+                                    <li><a class="dropdown-item"
+                                           href="?report_id={{ request.GET.report_id }}&is_fraud=1&search={{ search_query }}">Malicious</a>
+                                    </li>
+                                    <li><a class="dropdown-item"
+                                           href="?report_id={{ request.GET.report_id }}&is_fraud=0&search={{ search_query }}">Safe</a>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
+
                 </div>
 
                 <table class="table table-hover" style="border: 1px solid #dee2e6; margin-top: 20px;">
@@ -361,7 +387,7 @@
                         <tr>
                             <th scope="row" style="padding-left: 30px">{{ transaction.connect_varchar_id }}</th>
                             <td>{{ transaction.time|date:"d M H:i" }}</td>
-                            <td>{{ transaction.ip_address }}$</td>
+                            <td>{{ transaction.ip_address }}</td>
                             <td>{{ transaction.protocol }}</td>
                             <td>{{ transaction.bytes }}</td>
                             <td>
@@ -472,6 +498,11 @@
                             <li class="page-item">
                                 <a class="page-link btn-primary" href="?page=
                                         
+                                        
+                                        
+                                        
+                                        
+                                        
                                         {{ transactions.previous_page_number }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Back</a>
                             </li>
                         {% endif %}
@@ -485,10 +516,20 @@
                                 <a class="page-link btn-primary" href="?page=
                                         
                                         
+                                        
+                                        
+                                        
+                                        
+                                        
                                         {{ transactions.next_page_number }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Forward</a>
                             </li>
                             <li class="page-item">
                                 <a class="page-link btn-primary" href="?page=
+                                        
+                                        
+                                        
+                                        
+                                        
                                         
                                         
                                         {{ transactions.paginator.num_pages }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Last</a>
@@ -536,58 +577,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        // Данные из Django
-        const fraudCount = {{ fraud_count }};
-        const totalCount = {{ total_count }};
-        const normalCount = totalCount - fraudCount;
-
-        const amountBins = {{ amount_bins|safe }};
-        const normalAmounts = {{ normal_amounts|safe }};
-        const fraudAmounts = {{ fraud_amounts|safe }};
-
-        // Круговая диаграмма (общая статистика мошенничества)
-        new Chart(document.getElementById('fraudPieChart').getContext('2d'), {
-            type: 'pie',
-            data: {
-                labels: ["Normal Connections", "Fraudulent Connections"],
-                datasets: [{
-                    data: [normalCount, fraudCount],
-                    backgroundColor: ["#4CAF50", "#FF5252"],
-                }]
-            }
-        });
-
-        // Гистограмма по суммам
-        new Chart(document.getElementById('amountHistogram').getContext('2d'), {
-            type: 'bar',
-            data: {
-                labels: amountBins,
-                datasets: [
-                    {
-                        label: "Normal Transactions",
-                        data: normalAmounts,
-                        backgroundColor: "#4CAF50"
-                    },
-                    {
-                        label: "Fraudulent Transactions",
-                        data: fraudAmounts,
-                        backgroundColor: "#FF5252"
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    x: {title: {display: true, text: "Amount Ranges ($)"}},
-                    y: {title: {display: true, text: "Number of Transactions"}}
-                }
-            }
-        });
-    });
-</script>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {

@@ -49,4 +49,4 @@ def upload_csv(request):
     else:
         form = CSVUploadForm()
 
-    return render(request, "user_detail.html", {"form": form})
+    return render(request, "dashboard.html", {"form": form})

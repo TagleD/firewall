@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Firewall Rules</title>
+    {% load static %}
+
+    <link href="{% static '/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/dashboard.css' %}" rel="stylesheet">
+    <link href="{% static 'css/firewall_styles.css' %}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="dashboard">
+    <aside class="sidebar">
+        <ul class="sidebar-nav">
+            <li><a href="{% url 'user_detail' request.user.pk %}" class="">Dashboard</a></li>
+            <li><a href="#">Users</a></li>
+            <li><a href="{% url 'firewall_rules' %}" class="active">Firewall Rules</a></li>
+            <li><a href="{% url 'user_settings' user.pk %}">Settings</a></li>
+            <li><a href="{% url 'logout' %}">Logout</a></li>
+        </ul>
+    </aside>
+
+    <div class="main-content">
+        <div class="container my-5">
+            <h1 class="text-center mb-4">Firewall Rules Documentation</h1>
+            <p class="lead text-center">Explore the generated firewall rules, understand their purpose, and learn how
+                they
+                protect your network.</p>
+        </div>
+
+        <div class="container my-5">
+            <h2 class="mb-4">Rule Categories</h2>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="card p-3">
+                        <h5>Incoming Traffic Rules</h5>
+                        <p>Rules that control external connections trying to access your network.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card p-3">
+                        <h5>Outgoing Traffic Rules</h5>
+                        <p>Rules that regulate how your internal systems connect to the outside world.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card p-3">
+                        <h5>Suspicious Activity Detection</h5>
+                        <p>Automatically generated rules to block or flag abnormal behavior.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container my-5">
+            <h2 class="mb-4">Sample Firewall Rules</h2>
+
+            <div class="card p-3 mb-3">
+                <h5>Rule: Block Incoming SSH from Unknown IPs</h5>
+                <p><strong>Description:</strong> Prevent brute-force attacks by disallowing SSH access from unauthorized
+                    sources.</p>
+                <p><strong>Why attackers do this:</strong> Brute-forcing SSH credentials can give full server control.
+                </p>
+                <p><strong>Expert tip:</strong> Always limit SSH access by IP and use key-based authentication.</p>
+            </div>
+
+            <div class="card p-3 mb-3">
+                <h5>Rule: Allow HTTPS (Port 443) Only</h5>
+                <p><strong>Description:</strong> Allow only encrypted HTTPS traffic, blocking insecure HTTP.</p>
+                <p><strong>Why attackers do this:</strong> Intercepting HTTP can expose sensitive user data.</p>
+                <p><strong>Expert tip:</strong> Redirect all HTTP to HTTPS using server settings or a firewall rule.</p>
+            </div>
+
+            <div class="card p-3 mb-3">
+                <h5>Rule: Block Outbound Connections to Malicious Domains</h5>
+                <p><strong>Description:</strong> Prevent compromised devices inside your network from contacting malware
+                    servers.</p>
+                <p><strong>Why attackers do this:</strong> Malware often phones home to receive commands or exfiltrate
+                    data.
+                </p>
+                <p><strong>Expert tip:</strong> Update blocklists daily and monitor DNS traffic for anomalies.</p>
+            </div>
+        </div>
+
+        <div class="container my-5">
+            <h2 class="mb-4">How the AI Generates Rules</h2>
+            <p>The AI analyzes network behavior patterns, detects anomalies, and automatically proposes firewall rules
+                based
+                on observed threats. The goal is to dynamically adapt protection without requiring manual rule
+                creation.</p>
+
+            <ul>
+                <li>✅ Detects brute-force login attempts</li>
+                <li>✅ Identifies data exfiltration patterns</li>
+                <li>✅ Flags unusual traffic volume or destinations</li>
+                <li>✅ Suggests rules based on threat intelligence feeds</li>
+            </ul>
+        </div>
+
+        <div class="container my-5 text-center">
+            <h5>Want to know more about network security?</h5>
+            <a href="#" class="btn btn-primary mt-2">Read Our Security Guidelines</a>
+        </div>
+    </div>
+    
+</div>
+{# End of new dashborad #}
+
+
+</body>
+</html>
