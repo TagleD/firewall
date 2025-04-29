@@ -330,3 +330,15 @@ input:focus {
 .light-text {
     color: var(--text-light);
 }
+
+.wheat-text {
+    color: wheat !important;
+}
+
+.black-text {
+    color: black !important;
+}
+
+.form-text {
+    color: wheat !important;
+}

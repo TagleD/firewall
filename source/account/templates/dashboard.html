@@ -106,13 +106,8 @@
         <div class="rule-preview">
             <h2>Last Rule Generated</h2>
             <pre>
-                # Generated on 2023-04-14 at 15:30:22å
-                iptables -A INPUT -p tcp --dport 22 -s 192.168.1.0/24 -j ACCEPT
-                iptables -A INPUT -p tcp --dport 22 -j DROP
-                iptables -A INPUT -p tcp --dport 80 -s 10.0.0.0/8 -j ACCEPT
-                iptables -A INPUT -p tcp --dport 443 -j ACCEPT
-                iptables -A INPUT -j LOG --log-prefix "FIREWALL:DROP: " --log-level 6
-                iptables -A INPUT -j DROP
+                {{ created_at }}
+                {{ last_rule }}
             </pre>
         </div>
 
@@ -122,7 +117,7 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="transactionModalLabel">Transaction Details</h5>
+                        <h5 class="modal-title black-text" id="transactionModalLabel">Transaction Details</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -137,8 +132,16 @@
                                 <td id="modalTransactionTime"></td>
                             </tr>
                             <tr>
-                                <th>Amount</th>
-                                <td id="modalTransactionAmount"></td>
+                                <th>IP Address</th>
+                                <td id="modalTransactionIPAddress"></td>
+                            </tr>
+                            <tr>
+                                <th>Protocol</th>
+                                <td id="modalTransactionProtocol"></td>
+                            </tr>
+                            <tr>
+                                <th>Bytes</th>
+                                <td id="modalTransactionBytes"></td>
                             </tr>
                             <tr>
                                 <th>Report</th>
@@ -163,7 +166,14 @@
                             </tbody>
                         </table>
 
-                        <div id="transactionMap" style="width: 100%; height: 400px;"></div>
+                        <div class="rule-preview" >
+                            <h2>Rules</h2>
+                            <pre id="modalTransactionRules">
+                                
+                            </pre>
+                        </div>
+
+                        {#                        <div id="transactionMap" style="width: 100%; height: 400px;"></div>#}
 
                         {#                            <h6 class="mt-3">V1 - V28 Data</h6>#}
                         {#                            <div class="table-responsive">#}
@@ -438,49 +448,54 @@
                                 </td>
                             {% endif %}
                             <td style="padding-left: 50px;">
-                                <button class="view-data btn btn-outline-secondary btn-view"
-                                        style="padding: 1px 5px; font-size: 14px;"
-                                        data-id="{{ transaction.transaction_varchar_id }}"
-                                        data-time="{{ transaction.time|date:"D, d M Y H:i" }}"
-                                        data-amount="{{ transaction.amount }}"
-                                        data-report="{{ transaction.report.name }}"
-                                        data-status="{% if transaction.is_fraud %}Fraudulent{% else %}Normal{% endif %}"
-                                        data-v1="{{ transaction.v1 }}"
-                                        data-v2="{{ transaction.v2 }}"
-                                        data-v3="{{ transaction.v3 }}"
-                                        data-v4="{{ transaction.v4 }}"
-                                        data-v5="{{ transaction.v5 }}"
-                                        data-v6="{{ transaction.v6 }}"
-                                        data-v7="{{ transaction.v7 }}"
-                                        data-v8="{{ transaction.v8 }}"
-                                        data-v9="{{ transaction.v9 }}"
-                                        data-v10="{{ transaction.v10 }}"
-                                        data-v11="{{ transaction.v11 }}"
-                                        data-v12="{{ transaction.v12 }}"
-                                        data-v13="{{ transaction.v13 }}"
-                                        data-v14="{{ transaction.v14 }}"
-                                        data-v15="{{ transaction.v15 }}"
-                                        data-v16="{{ transaction.v16 }}"
-                                        data-v17="{{ transaction.v17 }}"
-                                        data-v18="{{ transaction.v18 }}"
-                                        data-v19="{{ transaction.v19 }}"
-                                        data-v20="{{ transaction.v20 }}"
-                                        data-v21="{{ transaction.v21 }}"
-                                        data-v22="{{ transaction.v22 }}"
-                                        data-v23="{{ transaction.v23 }}"
-                                        data-v24="{{ transaction.v24 }}"
-                                        data-v25="{{ transaction.v25 }}"
-                                        data-v26="{{ transaction.v26 }}"
-                                        data-v27="{{ transaction.v27 }}"
-                                        data-v28="{{ transaction.v28 }}"
-                                        data-risk_score="{{ transaction.risk_score }}%"
-                                        data-explanation="{{ transaction.explanation }}"
-                                        data-latitude="{{ transaction.latitude }}"
-                                        data-longitude="{{ transaction.longitude }}"
-                                        data-location="{{ transaction.location }}"
-                                >
-                                    View Data
-                                </button>
+                                {% if transaction.risk_score >= 60 %}
+                                    <button class="view-data btn btn-outline-secondary btn-view"
+                                            style="padding: 1px 5px; font-size: 14px;"
+                                            data-id="{{ transaction.connect_varchar_id }}"
+                                            data-time="{{ transaction.time|date:"D, d M Y H:i" }}"
+                                            data-protocol="{{ transaction.protocol }}"
+                                            data-bytes="{{ transaction.bytes }}"
+                                            data-rules="{{ transaction.firewall_rule }}"
+                                            data-ip-address="{{ transaction.ip_address }}"
+                                            data-report="{{ transaction.report.name }}"
+                                            data-status="{% if transaction.is_fraud %}Fraudulent{% else %}Normal{% endif %}"
+                                            data-v1="{{ transaction.v1 }}"
+                                            data-v2="{{ transaction.v2 }}"
+                                            data-v3="{{ transaction.v3 }}"
+                                            data-v4="{{ transaction.v4 }}"
+                                            data-v5="{{ transaction.v5 }}"
+                                            data-v6="{{ transaction.v6 }}"
+                                            data-v7="{{ transaction.v7 }}"
+                                            data-v8="{{ transaction.v8 }}"
+                                            data-v9="{{ transaction.v9 }}"
+                                            data-v10="{{ transaction.v10 }}"
+                                            data-v11="{{ transaction.v11 }}"
+                                            data-v12="{{ transaction.v12 }}"
+                                            data-v13="{{ transaction.v13 }}"
+                                            data-v14="{{ transaction.v14 }}"
+                                            data-v15="{{ transaction.v15 }}"
+                                            data-v16="{{ transaction.v16 }}"
+                                            data-v17="{{ transaction.v17 }}"
+                                            data-v18="{{ transaction.v18 }}"
+                                            data-v19="{{ transaction.v19 }}"
+                                            data-v20="{{ transaction.v20 }}"
+                                            data-v21="{{ transaction.v21 }}"
+                                            data-v22="{{ transaction.v22 }}"
+                                            data-v23="{{ transaction.v23 }}"
+                                            data-v24="{{ transaction.v24 }}"
+                                            data-v25="{{ transaction.v25 }}"
+                                            data-v26="{{ transaction.v26 }}"
+                                            data-v27="{{ transaction.v27 }}"
+                                            data-v28="{{ transaction.v28 }}"
+                                            data-risk_score="{{ transaction.risk_score }}%"
+                                            data-explanation="{{ transaction.explanation }}"
+                                            data-latitude="{{ transaction.latitude }}"
+                                            data-longitude="{{ transaction.longitude }}"
+                                            data-location="{{ transaction.location }}"
+                                    >
+                                        View Data
+                                    </button>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}
@@ -497,6 +512,9 @@
                             </li>
                             <li class="page-item">
                                 <a class="page-link btn-primary" href="?page=
+                                        
+                                        
+                                        
                                         
                                         
                                         
@@ -521,10 +539,16 @@
                                         
                                         
                                         
+                                        
+                                        
+                                        
                                         {{ transactions.next_page_number }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Forward</a>
                             </li>
                             <li class="page-item">
                                 <a class="page-link btn-primary" href="?page=
+                                        
+                                        
+                                        
                                         
                                         
                                         
@@ -651,12 +675,15 @@
                 // Получаем данные из атрибутов кнопки
                 document.getElementById("modalTransactionID").textContent = this.getAttribute("data-id");
                 document.getElementById("modalTransactionTime").textContent = this.getAttribute("data-time");
-                document.getElementById("modalTransactionAmount").textContent = this.getAttribute("data-amount");
+                document.getElementById("modalTransactionProtocol").textContent = this.getAttribute("data-protocol");
+                document.getElementById("modalTransactionIPAddress").textContent = this.getAttribute("data-ip-address");
                 document.getElementById("modalTransactionReport").textContent = this.getAttribute("data-report");
+                document.getElementById("modalTransactionBytes").textContent = this.getAttribute("data-bytes");
                 document.getElementById("modalTransactionStatus").textContent = this.getAttribute("data-status");
                 document.getElementById("modalTransactionRiskScore").textContent = this.getAttribute("data-risk_score");
                 {#document.getElementById("modalTransactionExplanation").textContent = this.getAttribute("data-explanation");#}
                 document.getElementById("modalTransactionLocation").textContent = this.getAttribute("data-location");
+                document.getElementById("modalTransactionRules").textContent = this.getAttribute("data-rules");
 
                 {#// Заполняем V1-V28 (можно упростить циклом)#}
                 {#for (let i = 1; i <= 28; i++) {#}
@@ -664,31 +691,31 @@
                 //{
 
                 // Получаем координаты транзакции
-                let latitude = parseFloat(this.getAttribute("data-latitude")) || 43.238949; // Москва по умолчанию
-                let longitude = parseFloat(this.getAttribute("data-longitude")) || 76.889709;
-
-                // Удаляем старую карту, если есть
-                let mapContainer = document.getElementById("transactionMap");
-                mapContainer.innerHTML = ""; // Чистим контейнер перед созданием новой карты
-                let newMapDiv = document.createElement("div");
-                newMapDiv.id = "transactionMapInner";
-                newMapDiv.style.width = "100%";
-                newMapDiv.style.height = "400px";
-                mapContainer.appendChild(newMapDiv);
-
-                // Инициализируем карту
-                ymaps.ready(function () {
-                    let map = new ymaps.Map("transactionMapInner", {
-                        center: [latitude, longitude],
-                        zoom: 12
-                    });
-
-                    let placemark = new ymaps.Placemark([latitude, longitude], {
-                        balloonContent: `Транзакция ID: ${button.getAttribute("data-id")}<br>Время: ${button.getAttribute("data-time")}`
-                    });
-
-                    map.geoObjects.add(placemark);
-                });
+                {#let latitude = parseFloat(this.getAttribute("data-latitude")) || 43.238949; // Москва по умолчанию#}
+                {#let longitude = parseFloat(this.getAttribute("data-longitude")) || 76.889709;#}
+                {##}
+                {#// Удаляем старую карту, если есть#}
+                {#let mapContainer = document.getElementById("transactionMap");#}
+                {#mapContainer.innerHTML = ""; // Чистим контейнер перед созданием новой карты#}
+                {#let newMapDiv = document.createElement("div");#}
+                {#newMapDiv.id = "transactionMapInner";#}
+                {#newMapDiv.style.width = "100%";#}
+                {#newMapDiv.style.height = "400px";#}
+                {#mapContainer.appendChild(newMapDiv);#}
+                {##}
+                {#// Инициализируем карту#}
+                {#ymaps.ready(function () {#}
+                {#    let map = new ymaps.Map("transactionMapInner", {#}
+                {#        center: [latitude, longitude],#}
+                {#        zoom: 12#}
+                {#    });#}
+                {##}
+                {#    let placemark = new ymaps.Placemark([latitude, longitude], {#}
+                {#        balloonContent: `Транзакция ID: ${button.getAttribute("data-id")}<br>Время: ${button.getAttribute("data-time")}`#}
+                {#    });#}
+                {##}
+                {#    map.geoObjects.add(placemark);#}
+                <!--});-->
 
                 // Открываем модальное окно
                 let modal = new bootstrap.Modal(document.getElementById("transactionModal"));

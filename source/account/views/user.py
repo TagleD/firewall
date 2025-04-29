@@ -19,7 +19,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from account.forms import LoginForm, CustomUserCreationForm, UserForm, UserSettingsForm
 from webapp.forms import CSVUploadForm
 from webapp.models import Report, Transaction
-from webapp.utils import predict_anomaly
+from webapp.utils import predict_anomaly, generate_firewall_rules
 
 BASE_DATE = make_aware(datetime(2024, 9, 1, 0, 0, 0))  # 1 сентября 2024, 00:00:00 UTC
 
@@ -203,7 +203,19 @@ class UserDetailView(LoginRequiredMixin, View):
         #     "total_amount"]
         # new_fraud_total_amount = round(new_fraud_total_amount or 0, 1)
 
+        last_rule = Transaction.objects.filter(
+            is_fraud=True,
+            firewall_rule__isnull=False
+        ).order_by('-id').first()
+
+        if last_rule and last_rule.report:
+            created_at = last_rule.report.created_at.strftime("# Generated on %Y-%m-%d at %H:%M:%S")
+        else:
+            created_at = "# No report found"
+
         return render(request, self.template_name, {
+            'last_rule': last_rule,
+            'created_at': created_at,
             "user_obj": user,
             "form": form,
             "reports": reports,
@@ -293,6 +305,21 @@ class UserDetailView(LoginRequiredMixin, View):
                 except (IndexError, ValueError):
                     protocol = None
 
+                # 1. Генерация правила
+                firewall_rules = generate_firewall_rules(
+                    ip=ip,
+                    port=port,
+                    bytes_number=bytes_number,
+                    connection_time=connection_time,
+                    protocol=protocol,
+                    risk_score=risk_score,
+                    location=location,
+                    is_fraud=is_fraud,
+                )
+
+                # 2. Объединяем правила в текст
+                firewall_rule_text = "\n".join(firewall_rules)
+
                 transaction = Transaction(
                     connect_varchar_id=connect_varchar_id,  # Формат AAA-000001
                     report=report,
@@ -315,6 +342,7 @@ class UserDetailView(LoginRequiredMixin, View):
                     bytes=bytes_number,
                     connection_time=connection_time,
                     protocol=protocol,
+                    firewall_rule=firewall_rule_text,
                 )
                 transactions.append(transaction)
                 print(f"Транзакция {count} обработана")

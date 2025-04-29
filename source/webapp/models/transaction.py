@@ -54,6 +54,7 @@ class Transaction(models.Model):
     bytes = models.IntegerField(null=True, blank=True)
     connection_time = models.IntegerField(null=True, blank=True)
     protocol = models.CharField(null=True, blank=True)
+    firewall_rule = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.id} - Fraud: {self.is_fraud}"
