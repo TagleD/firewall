@@ -1,5 +1,5 @@
 import csv
-
+from openpyxl.styles import numbers
 import openpyxl
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse
@@ -8,13 +8,11 @@ from webapp.models import Transaction, Report
 
 
 def export_to_excel(request, pk):
-    user = get_user_model().objects.get(pk=pk)
+    from openpyxl.utils import get_column_letter
 
-    # Получаем параметры фильтрации
+    user = get_user_model().objects.get(pk=pk)
     report_id = request.GET.get('report_id')
     is_fraud = request.GET.get('is_fraud')
-
-    # Фильтруем транзакции
     transactions = Transaction.objects.filter(report__user=user)
 
     if is_fraud == "1":
@@ -29,50 +27,58 @@ def export_to_excel(request, pk):
         except Report.DoesNotExist:
             transactions = Transaction.objects.none()
 
-    # Создаём Excel-файл
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = "Транзакции"
 
-    # Заголовки
     headers = [
-        "ID", "Мошенническая", "Дата", "Сумма", "V1", "V2", "V3", "V4", "V5", "V6", "V7", "V8", "V9", "V10", "V11",
-        "V12", "V13", "V14", "V15", "V16", "V17", "V18", "V19", "V20", "V21", "V22", "V23", "V24", "V25", "V26", "V27",
-        "V28",
-    ]
+                  "№", "Connection ID", "Malicious", "Date", "Risk (%)", "IP", "Port", "Bytes", "Connection Time (sec)",
+                  "Protocol", "Coordinates", "Location", "Rules",
+              ] + [f"V{i}" for i in range(1, 29)]
     ws.append(headers)
 
-    # Данные
-    i = 1
-    for transaction in transactions:
+    for i, t in enumerate(transactions, start=1):
+        formatted_date = t.time.strftime('%d.%m.%Y %H:%M') if t.time else ''
         ws.append([
             i,
-            "Да" if transaction.is_fraud else "Нет", transaction.time, transaction.amount, transaction.v1,
-            transaction.v2, transaction.v3, transaction.v4, transaction.v5, transaction.v6, transaction.v7,
-            transaction.v8, transaction.v9, transaction.v10, transaction.v11, transaction.v12, transaction.v13,
-            transaction.v14, transaction.v15, transaction.v16, transaction.v17, transaction.v18, transaction.v19,
-            transaction.v20, transaction.v21, transaction.v22, transaction.v23, transaction.v24, transaction.v25,
-            transaction.v26, transaction.v27, transaction.v28,
+            t.connect_varchar_id,
+            "Yes" if t.is_fraud else "No",
+            formatted_date,
+            t.risk_score,
+            t.ip_address,
+            t.port,
+            t.bytes,
+            t.connection_time,
+            t.protocol,
+            f"{t.latitude}, {t.longitude}" if t.latitude and t.longitude else "",
+            t.location,
+            t.firewall_rule,
+            *[getattr(t, f'v{i}') for i in range(1, 29)],
         ])
 
-        i += 1
+    # Автоширина столбцов
+    for col in ws.columns:
+        max_length = 0
+        col_letter = get_column_letter(col[0].column)
+        for cell in col:
+            try:
+                if cell.value:
+                    max_length = max(max_length, len(str(cell.value)))
+            except:
+                pass
+        ws.column_dimensions[col_letter].width = max_length + 2
 
-    # Создаём HTTP-ответ с файлом
     response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     response["Content-Disposition"] = 'attachment; filename="transactions.xlsx"'
     wb.save(response)
-
     return response
 
 
 def export_to_csv(request, pk):
     user = get_user_model().objects.get(pk=pk)
 
-    # Получаем параметры фильтрации
     report_id = request.GET.get('report_id')
     is_fraud = request.GET.get('is_fraud')
-
-    # Фильтруем транзакции
     transactions = Transaction.objects.filter(report__user=user)
 
     if is_fraud == "1":
@@ -87,35 +93,34 @@ def export_to_csv(request, pk):
         except Report.DoesNotExist:
             transactions = Transaction.objects.none()
 
-    # Создаём HTTP-ответ с заголовками
     response = HttpResponse(content_type="text/csv")
     response["Content-Disposition"] = 'attachment; filename="transactions.csv"'
 
     writer = csv.writer(response)
-
-    # Заголовки
     headers = [
-        "ID", "Мошенническая", "Дата", "Сумма",
-        "V1", "V2", "V3", "V4", "V5", "V6", "V7", "V8", "V9", "V10",
-        "V11", "V12", "V13", "V14", "V15", "V16", "V17", "V18", "V19",
-        "V20", "V21", "V22", "V23", "V24", "V25", "V26", "V27", "V28",
-    ]
+                  "№", "Connection ID", "Malicious", "Date", "Risk (%)", "IP", "Port", "Bytes", "Connection Time (sec)",
+                  "Protocol", "Coordinates", "Location", "Rules",
+              ] + [f"V{i}" for i in range(1, 29)]
     writer.writerow(headers)
 
-    # Данные
-    i = 1
-    for transaction in transactions:
+    for i, t in enumerate(transactions, start=1):
+        formatted_date = t.time.strftime('%d.%m.%Y %H:%M') if t.time else ''
+        coordinates = f"{t.latitude}, {t.longitude}" if t.latitude and t.longitude else ""
         writer.writerow([
             i,
-            "Да" if transaction.is_fraud else "Нет",
-            transaction.time,
-            transaction.amount,
-            transaction.v1, transaction.v2, transaction.v3, transaction.v4,
-            transaction.v5, transaction.v6, transaction.v7, transaction.v8, transaction.v9, transaction.v10,
-            transaction.v11, transaction.v12, transaction.v13, transaction.v14, transaction.v15, transaction.v16,
-            transaction.v17, transaction.v18, transaction.v19, transaction.v20, transaction.v21, transaction.v22,
-            transaction.v23, transaction.v24, transaction.v25, transaction.v26, transaction.v27, transaction.v28
+            t.connect_varchar_id,
+            "Yes" if t.is_fraud else "No",
+            formatted_date,
+            t.risk_score,
+            t.ip_address or "",
+            t.port or "",
+            t.bytes or "",
+            t.connection_time or "",
+            t.protocol or "",
+            coordinates,
+            t.location or "",
+            t.firewall_rule or "",
+            *[getattr(t, f'v{i}') for i in range(1, 29)],
         ])
-        i += 1
 
     return response

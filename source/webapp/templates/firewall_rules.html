@@ -28,6 +28,22 @@
             <li><a href="{% url 'user_detail' request.user.pk %}" class="">Dashboard</a></li>
             <li><a href="{% url 'user_statistics' %}">User Statistics</a></li>
             <li><a href="{% url 'firewall_rules' %}" class="active">Firewall Rules</a></li>
+            <li>
+                <button data-bs-toggle="modal" data-bs-target="#exampleModal"
+                        style="display: block; padding: 0.8rem 2rem; color: var(--text-medium); text-decoration: none; transition: all 0.3s ease; border-left: 3px solid transparent; background: none; border: none;">
+                    Add Report
+                </button>
+            </li>
+            <li>
+                <a href="{% url 'export_excel' request.user.pk %}?report_id={{ report.id }}&is_fraud={{ current_is_fraud }}">
+                    Export to EXCEL
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'export_csv' request.user.pk %}?report_id={{ report.id }}&is_fraud={{ current_is_fraud }}">
+                    Export to CSV
+                </a>
+            </li>
             <li><a href="{% url 'user_settings' user.pk %}">Settings</a></li>
             <li><a href="{% url 'logout' %}">Logout</a></li>
         </ul>

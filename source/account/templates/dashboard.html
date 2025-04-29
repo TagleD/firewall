@@ -22,6 +22,22 @@
             <li><a href="#" class="active">Dashboard</a></li>
             <li><a href="{% url 'user_statistics' %}">User Statistics</a></li>
             <li><a href="{% url 'firewall_rules' %}">Firewall Rules</a></li>
+            <li>
+                <button data-bs-toggle="modal" data-bs-target="#exampleModal"
+                        style="display: block; padding: 0.8rem 2rem; color: var(--text-medium); text-decoration: none; transition: all 0.3s ease; border-left: 3px solid transparent; background: none; border: none;">
+                    Add Report
+                </button>
+            </li>
+            <li>
+                <a href="{% url 'export_excel' user_obj.pk %}?report_id={{ report.id }}&is_fraud={{ current_is_fraud }}">
+                    Export to EXCEL
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'export_csv' user_obj.pk %}?report_id={{ report.id }}&is_fraud={{ current_is_fraud }}">
+                    Export to CSV
+                </a>
+            </li>
             <li><a href="{% url 'user_settings' user.pk %}">Settings</a></li>
             <li><a href="{% url 'logout' %}">Logout</a></li>
         </ul>
@@ -33,20 +49,13 @@
 
             <div class="btn-toolbar mb-2 mb-md-0">
                 <div class="button" style="margin-right: 15px;">
-                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                        Add Report
-                    </button>
+                    {#                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exampleModal">#}
+                    {#                        Add Report#}
+                    {#                    </button>#}
                 </div>
 
                 <div class="btn-group me-2">
-                    <a href="{% url 'export_excel' user_obj.pk %}?report_id={{ report.id }}&is_fraud={{ current_is_fraud }}"
-                       class="btn btn-sm btn-outline-secondary button-padding-8">
-                        Export to EXCEL
-                    </a>
-                    <a href="{% url 'export_csv' user_obj.pk %}?report_id={{ report.id }}&is_fraud={{ current_is_fraud }}"
-                       class="btn btn-sm btn-outline-secondary button-padding-8">
-                        Export to CSV
-                    </a>
+
                 </div>
             </div>
         </div>
@@ -103,9 +112,10 @@
 
 
         </div>
-        <div class="rule-preview">
-            <h2>Last Rule Generated</h2>
-            <pre>
+        <div class="rule-preview" id="lastRuleGeneratedBlock" style="margin-top: 40px;">
+            <h2 id="lastRuleTitle">Last Rule Generated</h2>
+            <pre id="lastRuleContent"
+                 style="padding: 15px; border-radius: 8px; font-size: 14px; white-space: pre-wrap; word-wrap: break-word;">
                 {{ created_at }}
                 {{ last_rule }}
             </pre>
@@ -166,9 +176,18 @@
                             </tbody>
                         </table>
 
-                        <div class="rule-preview" >
+                        <div class="rule-preview" id="rulesGenerated">
                             <h2>Rules</h2>
-                            <pre id="modalTransactionRules">
+                            <pre id="lastRuleContent" style="
+                                color: #00ff66;
+                                background-color: #1e1e1e;
+                                padding: 20px;
+                                border-radius: 10px;
+                                font-family: 'Courier New', monospace;
+                                font-size: 14px;
+                                white-space: pre-wrap;
+                                word-wrap: break-word;
+                            ">
                                 
                             </pre>
                         </div>
@@ -389,7 +408,7 @@
                         <th scope="col">Bytes</th>
                         <th scope="col">Risk Score</th>
                         <th scope="col" style="text-align: center;">Status</th>
-                        <th scope="col" style="padding-left: 50px;">View Data</th>
+                        <th scope="col" style="padding-left: 50px;">View Rules</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -430,7 +449,7 @@
                                             <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
                                             <path d="m10.97 4.97-.02.022-3.473 4.425-2.093-2.094a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05"/>
                                         </svg>
-                                        Normal
+                                        Safe
                                     </p>
                                 </td>
                             {% else %}
@@ -443,7 +462,7 @@
                                             <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
                                             <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/>
                                         </svg>
-                                        Fraudulent
+                                        Malicious
                                     </p>
                                 </td>
                             {% endif %}
@@ -458,7 +477,7 @@
                                             data-rules="{{ transaction.firewall_rule }}"
                                             data-ip-address="{{ transaction.ip_address }}"
                                             data-report="{{ transaction.report.name }}"
-                                            data-status="{% if transaction.is_fraud %}Fraudulent{% else %}Normal{% endif %}"
+                                            data-status="{% if transaction.is_fraud %}Malicious{% else %}Safe{% endif %}"
                                             data-v1="{{ transaction.v1 }}"
                                             data-v2="{{ transaction.v2 }}"
                                             data-v3="{{ transaction.v3 }}"
@@ -493,7 +512,7 @@
                                             data-longitude="{{ transaction.longitude }}"
                                             data-location="{{ transaction.location }}"
                                     >
-                                        View Data
+                                        View Rules
                                     </button>
                                 {% endif %}
                             </td>
@@ -512,6 +531,16 @@
                             </li>
                             <li class="page-item">
                                 <a class="page-link btn-primary" href="?page=
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
                                         
                                         
                                         
@@ -542,10 +571,30 @@
                                         
                                         
                                         
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
                                         {{ transactions.next_page_number }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Forward</a>
                             </li>
                             <li class="page-item">
                                 <a class="page-link btn-primary" href="?page=
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
+                                        
                                         
                                         
                                         
@@ -575,7 +624,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Create a new report</h5>
+                <h5 class="modal-title black-text" id="exampleModalLabel">Create a new report</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
             </div>
@@ -665,64 +714,100 @@
 </script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        let viewDataButtons = document.querySelectorAll(".view-data");
+    document.querySelectorAll(".view-data").forEach(function (button) {
+        button.addEventListener("click", function () {
+            const id = this.getAttribute("data-id") || "-";
+            const time = this.getAttribute("data-time") || "-";
+            const ip = this.getAttribute("data-ip-address") || "-";
+            const protocol = this.getAttribute("data-protocol") || "-";
+            const bytes = this.getAttribute("data-bytes") || "-";
+            const report = this.getAttribute("data-report") || "-";
+            const risk = this.getAttribute("data-risk_score") || "-";
+            const location = this.getAttribute("data-location") || "-";
+            const rule = this.getAttribute("data-rules") || "No rules available";
 
-        viewDataButtons.forEach(button => {
-            button.addEventListener("click", function (event) {
-                event.preventDefault();
+            const content = `
+Connection ID:     ${id}
+Time:              ${time}
+IP Address:        ${ip}
+Protocol:          ${protocol}
+Bytes:             ${bytes}
+Report:            ${report}
+Risk Score:        ${risk}
+Location:          ${location}
 
-                // Получаем данные из атрибутов кнопки
-                document.getElementById("modalTransactionID").textContent = this.getAttribute("data-id");
-                document.getElementById("modalTransactionTime").textContent = this.getAttribute("data-time");
-                document.getElementById("modalTransactionProtocol").textContent = this.getAttribute("data-protocol");
-                document.getElementById("modalTransactionIPAddress").textContent = this.getAttribute("data-ip-address");
-                document.getElementById("modalTransactionReport").textContent = this.getAttribute("data-report");
-                document.getElementById("modalTransactionBytes").textContent = this.getAttribute("data-bytes");
-                document.getElementById("modalTransactionStatus").textContent = this.getAttribute("data-status");
-                document.getElementById("modalTransactionRiskScore").textContent = this.getAttribute("data-risk_score");
-                {#document.getElementById("modalTransactionExplanation").textContent = this.getAttribute("data-explanation");#}
-                document.getElementById("modalTransactionLocation").textContent = this.getAttribute("data-location");
-                document.getElementById("modalTransactionRules").textContent = this.getAttribute("data-rules");
+--- Firewall Rules ---
+${rule.trim()}
+        `;
 
-                {#// Заполняем V1-V28 (можно упростить циклом)#}
-                {#for (let i = 1; i <= 28; i++) {#}
-                {#    document.getElementById(`modalTransactionV${i}`).textContent = this.getAttribute(`data-v${i}`);#}
-                //{
-
-                // Получаем координаты транзакции
-                {#let latitude = parseFloat(this.getAttribute("data-latitude")) || 43.238949; // Москва по умолчанию#}
-                {#let longitude = parseFloat(this.getAttribute("data-longitude")) || 76.889709;#}
-                {##}
-                {#// Удаляем старую карту, если есть#}
-                {#let mapContainer = document.getElementById("transactionMap");#}
-                {#mapContainer.innerHTML = ""; // Чистим контейнер перед созданием новой карты#}
-                {#let newMapDiv = document.createElement("div");#}
-                {#newMapDiv.id = "transactionMapInner";#}
-                {#newMapDiv.style.width = "100%";#}
-                {#newMapDiv.style.height = "400px";#}
-                {#mapContainer.appendChild(newMapDiv);#}
-                {##}
-                {#// Инициализируем карту#}
-                {#ymaps.ready(function () {#}
-                {#    let map = new ymaps.Map("transactionMapInner", {#}
-                {#        center: [latitude, longitude],#}
-                {#        zoom: 12#}
-                {#    });#}
-                {##}
-                {#    let placemark = new ymaps.Placemark([latitude, longitude], {#}
-                {#        balloonContent: `Транзакция ID: ${button.getAttribute("data-id")}<br>Время: ${button.getAttribute("data-time")}`#}
-                {#    });#}
-                {##}
-                {#    map.geoObjects.add(placemark);#}
-                <!--});-->
-
-                // Открываем модальное окно
-                let modal = new bootstrap.Modal(document.getElementById("transactionModal"));
-                modal.show();
-            });
+            document.getElementById("lastRuleContent").textContent = content.trim();
+            document.getElementById("lastRuleTitle").textContent = `Rule for ${id}`;
+            document.getElementById("lastRuleGeneratedBlock").scrollIntoView({behavior: "smooth"});
         });
     });
+</script>
+
+<script>
+    {#document.addEventListener("DOMContentLoaded", function () {#}
+    {#    let viewDataButtons = document.querySelectorAll(".view-data");#}
+    {##}
+    {#    viewDataButtons.forEach(button => {#}
+    {#        button.addEventListener("click", function (event) {#}
+    {#            event.preventDefault();#}
+    {##}
+    {#            // Получаем данные из атрибутов кнопки#}
+    {#            document.getElementById("modalTransactionID").textContent = this.getAttribute("data-id");#}
+    {#            document.getElementById("modalTransactionTime").textContent = this.getAttribute("data-time");#}
+    {#            document.getElementById("modalTransactionProtocol").textContent = this.getAttribute("data-protocol");#}
+    {#            document.getElementById("modalTransactionIPAddress").textContent = this.getAttribute("data-ip-address");#}
+    {#            document.getElementById("modalTransactionReport").textContent = this.getAttribute("data-report");#}
+    {#            document.getElementById("modalTransactionBytes").textContent = this.getAttribute("data-bytes");#}
+    {#            document.getElementById("modalTransactionStatus").textContent = this.getAttribute("data-status");#}
+    {#            document.getElementById("modalTransactionRiskScore").textContent = this.getAttribute("data-risk_score");#}
+    {#document.getElementById("modalTransactionExplanation").textContent = this.getAttribute("data-explanation");#}
+    {#            document.getElementById("modalTransactionLocation").textContent = this.getAttribute("data-location");#}
+    {#            document.getElementById("modalTransactionRules").textContent = this.getAttribute("data-rules");#}
+    {##}
+    {#// Заполняем V1-V28 (можно упростить циклом)#}
+    {#for (let i = 1; i <= 28; i++) {#}
+    {#    document.getElementById(`modalTransactionV${i}`).textContent = this.getAttribute(`data-v${i}`);#}
+    {#            //{#}
+    {##}
+    {#            // Получаем координаты транзакции#}
+    {#let latitude = parseFloat(this.getAttribute("data-latitude")) || 43.238949; // Москва по умолчанию#}
+    {#let longitude = parseFloat(this.getAttribute("data-longitude")) || 76.889709;#}
+    {##}
+    {#// Удаляем старую карту, если есть#}
+    {#let mapContainer = document.getElementById("transactionMap");#}
+    {#mapContainer.innerHTML = ""; // Чистим контейнер перед созданием новой карты#}
+    {#let newMapDiv = document.createElement("div");#}
+    {#newMapDiv.id = "transactionMapInner";#}
+    {#newMapDiv.style.width = "100%";#}
+    {#newMapDiv.style.height = "400px";#}
+    {#mapContainer.appendChild(newMapDiv);#}
+    {##}
+    {#// Инициализируем карту#}
+    {#ymaps.ready(function () {#}
+    {#    let map = new ymaps.Map("transactionMapInner", {#}
+    {#        center: [latitude, longitude],#}
+    {#        zoom: 12#}
+    {#    });#}
+    {##}
+    {#    let placemark = new ymaps.Placemark([latitude, longitude], {#}
+    {#        balloonContent: `Транзакция ID: ${button.getAttribute("data-id")}<br>Время: ${button.getAttribute("data-time")}`#}
+    {#    });#}
+    {##}
+    {#    map.geoObjects.add(placemark);#}
+    {#            <!--});-->#}
+    {##}
+    {#            // Открываем модальное окно#}
+    {#            let modal = new bootstrap.Modal(document.getElementById("transactionModal"));#}
+    {#            modal.show();#}
+    {#        });#}
+    {#    });#}
+    {#})
+        ;
+    #}
 </script>
 
 <script>
