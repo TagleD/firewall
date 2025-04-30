@@ -21,7 +21,7 @@ from webapp.forms import CSVUploadForm
 from webapp.models import Report, Transaction
 from webapp.utils import predict_anomaly, generate_firewall_rules
 
-BASE_DATE = make_aware(datetime(2024, 9, 1, 0, 0, 0))  # 1 сентября 2024, 00:00:00 UTC
+BASE_DATE = make_aware(datetime(2025, 4, 1, 0, 0, 0))  # 1 сентября 2024, 00:00:00 UTC
 
 
 class LoginView(TemplateView):

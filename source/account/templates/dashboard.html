@@ -530,27 +530,7 @@
                                    href="?page=1{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">First</a>
                             </li>
                             <li class="page-item">
-                                <a class="page-link btn-primary" href="?page=
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        {{ transactions.previous_page_number }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Back</a>
+                                <a class="page-link btn-primary" href="?page={{ transactions.previous_page_number }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Back</a>
                             </li>
                         {% endif %}
 
@@ -560,52 +540,10 @@
 
                         {% if transactions.has_next %}
                             <li class="page-item">
-                                <a class="page-link btn-primary" href="?page=
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        {{ transactions.next_page_number }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Forward</a>
+                                <a class="page-link btn-primary" href="?page={{ transactions.next_page_number }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Forward</a>
                             </li>
                             <li class="page-item">
-                                <a class="page-link btn-primary" href="?page=
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        
-                                        {{ transactions.paginator.num_pages }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Last</a>
+                                <a class="page-link btn-primary" href="?page={{ transactions.paginator.num_pages }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Last</a>
                             </li>
                         {% endif %}
                     </ul>
