@@ -3,9 +3,9 @@ from django.db import models
 from webapp.models.report import Report
 
 
-class Transaction(models.Model):
-    report = models.ForeignKey(Report, on_delete=models.CASCADE)  # Привязываем к отчету
-    time = models.DateTimeField()  # Храним реальную дату и время транзакции
+class Connection(models.Model):
+    report = models.ForeignKey(Report, on_delete=models.CASCADE)
+    time = models.DateTimeField()
     v1 = models.FloatField()
     v2 = models.FloatField()
     v3 = models.FloatField()
@@ -40,7 +40,7 @@ class Transaction(models.Model):
         max_length=10,
         null=False,
         blank=False,
-        verbose_name="Уникальный сгенерированный ID"
+        verbose_name="ID"
     )
     risk_score = models.PositiveSmallIntegerField()
     latitude = models.FloatField(null=True, blank=True)

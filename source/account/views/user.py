@@ -18,7 +18,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from account.forms import LoginForm, CustomUserCreationForm, UserForm, UserSettingsForm
 from webapp.forms import CSVUploadForm
-from webapp.models import Report, Transaction
+from webapp.models import Report, Connection
 from webapp.utils import predict_anomaly, generate_firewall_rules
 
 BASE_DATE = make_aware(datetime(2025, 4, 1, 0, 0, 0))  # 1 сентября 2024, 00:00:00 UTC
@@ -104,31 +104,30 @@ class UserDetailView(LoginRequiredMixin, View):
         is_fraud = request.GET.get('is_fraud')
         search_query = request.GET.get('search', "").strip()  # Поисковый запрос
 
-        # Фильтруем транзакции для конкретного пользователя
-        transactions = Transaction.objects.filter(report__user=user)
+        connections = Connection.objects.filter(report__user=user)
 
         if search_query:
-            transactions = transactions.filter(connect_varchar_id__icontains=search_query)
+            connections = connections.filter(connect_varchar_id__icontains=search_query)
 
         if is_fraud == "1":
-            transactions = transactions.filter(is_fraud=True)
+            connections = connections.filter(is_fraud=True)
         elif is_fraud == "0":
-            transactions = transactions.filter(is_fraud=False)
+            connections = connections.filter(is_fraud=False)
 
         if report_id:
             try:
                 report = Report.objects.get(id=report_id, user=user)  # Проверяем, что отчёт принадлежит пользователю
-                transactions = transactions.filter(report=report)
+                connections = connections.filter(report=report)
             except Report.DoesNotExist:
-                transactions = Transaction.objects.none()
+                connections = Connection.objects.none()
 
         # Подсчет общей стоимости мошеннических операций
-        # fraud_total_amount = transactions.filter(is_fraud=True).aggregate(total_amount=Sum("amount"))["total_amount"]
+        # fraud_total_amount = connections.filter(is_fraud=True).aggregate(total_amount=Sum("amount"))["total_amount"]
         # fraud_total_amount = round(fraud_total_amount or 0, 1)
 
         # Подсчет данных для инфографики
-        total_count = transactions.count()  # Общее количество
-        fraud_count = transactions.filter(is_fraud=True).count()  # Мошеннические
+        total_count = connections.count()  # Общее количество
+        fraud_count = connections.filter(is_fraud=True).count()  # Мошеннические
         non_fraud_count = total_count - fraud_count  # Немошеннические
         fraud_percentage = round((fraud_count / total_count * 100),
                                  2) if total_count > 0 else 0  # Процент мошенничества
@@ -144,11 +143,11 @@ class UserDetailView(LoginRequiredMixin, View):
 
         if last_report:
             # Считаем прирост процента мошеннических операций после последнего отчета
-            transactions_without_last = transactions.exclude(report=last_report)
+            connections_without_last = connections.exclude(report=last_report)
 
-            # Количество всех транзакций без последнего отчета
-            total_count_without_last = transactions_without_last.count()
-            fraud_count_without_last = transactions_without_last.filter(is_fraud=True).count()
+            # Количество всех без последнего отчета
+            total_count_without_last = connections_without_last.count()
+            fraud_count_without_last = connections_without_last.filter(is_fraud=True).count()
 
             # Процент мошенничества без последнего отчета
             fraud_percentage_without_last = round(
@@ -161,7 +160,7 @@ class UserDetailView(LoginRequiredMixin, View):
         # Вычисляем разницу с текущим процентом
         fraud_percentage_change = round(fraud_percentage - fraud_percentage_without_last, 2)
 
-        # for t in transactions:
+        # for t in connections:
         #     for i in range(len(amount_bins) - 1):
         #         if amount_bins[i] <= t.amount < amount_bins[i + 1]:
         #             if t.is_fraud:
@@ -171,39 +170,34 @@ class UserDetailView(LoginRequiredMixin, View):
         #             break
 
         # Пагинация
-        paginator = Paginator(transactions, self.paginate_by)
+        paginator = Paginator(connections, self.paginate_by)
         page = request.GET.get('page')
 
         try:
-            transactions = paginator.page(page)
+            connections = paginator.page(page)
         except PageNotAnInteger:
-            transactions = paginator.page(1)
+            connections = paginator.page(1)
         except EmptyPage:
-            transactions = paginator.page(paginator.num_pages)
+            connections = paginator.page(paginator.num_pages)
 
         if not report_id:
             report = None
 
         if last_report:
-            new_transactions = Transaction.objects.filter(
+            new_connections = Connection.objects.filter(
                 report__user=user,
                 report=last_report,
             )
         else:
-            new_transactions = Transaction.objects.filter(report__user=user)  # Если отчетов нет, берем все транзакции
+            new_connections = Connection.objects.filter(report__user=user)  # Если отчетов нет, берем все
 
-        # Количество новых транзакций
-        new_transactions_count = new_transactions.count()
+        # Количество новых
+        new_connections_count = new_connections.count()
 
-        # Количество мошеннических транзакций среди новых
-        new_fraud_transactions_count = new_transactions.filter(is_fraud=True).count()
+        # Количество мошеннических среди новых
+        new_fraud_connections_count = new_connections.filter(is_fraud=True).count()
 
-        # Подсчет общей стоимости мошеннических операций в последнем отчете
-        # new_fraud_total_amount = new_transactions.filter(is_fraud=True).aggregate(total_amount=Sum("amount"))[
-        #     "total_amount"]
-        # new_fraud_total_amount = round(new_fraud_total_amount or 0, 1)
-
-        last_rule = Transaction.objects.filter(
+        last_rule = Connection.objects.filter(
             is_fraud=True,
             firewall_rule__isnull=False
         ).order_by('-id').first()
@@ -219,7 +213,7 @@ class UserDetailView(LoginRequiredMixin, View):
             "user_obj": user,
             "form": form,
             "reports": reports,
-            "transactions": transactions,
+            "connections": connections,
             "report": report,
             "current_is_fraud": is_fraud,
             "total_count": total_count,
@@ -230,8 +224,8 @@ class UserDetailView(LoginRequiredMixin, View):
             "normal_amounts": json.dumps(normal_amounts),
             "fraud_amounts": json.dumps(fraud_amounts),
             # "fraud_total_amount": fraud_total_amount,
-            "new_transactions_count": new_transactions_count,
-            "new_fraud_transactions_count": new_fraud_transactions_count,
+            "new_connections_count": new_connections_count,
+            "new_fraud_connections_count": new_fraud_connections_count,
             # "new_fraud_total_amount": new_fraud_total_amount,
             "fraud_percentage_change": fraud_percentage_change,
             "search_query": search_query,
@@ -253,15 +247,15 @@ class UserDetailView(LoginRequiredMixin, View):
             # Генерируем случайный 3-буквенный префикс
             prefix = ''.join(random.choices(string.ascii_uppercase, k=3))
 
-            transactions = []
+            connections = []
             count = 1
             for row in reader:
                 time = float(row[0])
                 features = list(map(float, row[1:29]))  # V1 - V28
-                is_fraud, risk_score, explanation = predict_anomaly(features)  # Анализируем транзакцию
+                is_fraud, risk_score, explanation = predict_anomaly(features)  # Анализируем
                 connect_varchar_id = f"{prefix}-{count:06d}"
 
-                transaction_time = BASE_DATE + timedelta(seconds=time)  # Считаем реальную дату
+                connection_time = BASE_DATE + timedelta(seconds=time)  # Считаем реальную дату
 
                 # Проверяем наличие координат
                 try:
@@ -295,9 +289,9 @@ class UserDetailView(LoginRequiredMixin, View):
 
                 # CONNECTION TIME
                 try:
-                    connection_time = int(row[35]) if row[35] else None
+                    connection_duration = int(row[35]) if row[35] else None
                 except (IndexError, ValueError):
-                    connection_time = None
+                    connection_duration = None
 
                 # PROTOCOL
                 try:
@@ -320,10 +314,10 @@ class UserDetailView(LoginRequiredMixin, View):
                 # 2. Объединяем правила в текст
                 firewall_rule_text = "\n".join(firewall_rules)
 
-                transaction = Transaction(
+                connection = Connection(
                     connect_varchar_id=connect_varchar_id,  # Формат AAA-000001
                     report=report,
-                    time=transaction_time,
+                    time=connection_time,
                     v1=features[0], v2=features[1], v3=features[2], v4=features[3],
                     v5=features[4], v6=features[5], v7=features[6], v8=features[7],
                     v9=features[8], v10=features[9], v11=features[10], v12=features[11],
@@ -340,15 +334,15 @@ class UserDetailView(LoginRequiredMixin, View):
                     ip_address=ip,
                     port=port,
                     bytes=bytes_number,
-                    connection_time=connection_time,
+                    connection_time=connection_duration,
                     protocol=protocol,
                     firewall_rule=firewall_rule_text,
                 )
-                transactions.append(transaction)
-                print(f"Транзакция {count} обработана")
+                connections.append(connection)
+                print(f"Соединение {count} обработана")
                 count += 1
 
-            Transaction.objects.bulk_create(transactions)  # Массовая вставка в базу
+            Connection.objects.bulk_create(connections)  # Массовая вставка в базу
             return redirect(reverse('user_detail', kwargs={'pk': request.user.pk}))
 
         # Если форма невалидна, перерендерим страницу с ошибками
@@ -376,15 +370,15 @@ class UsersStatistics(LoginRequiredMixin, View):
 
         for user in users:
             reports = Report.objects.filter(user=user)
-            transactions = Transaction.objects.filter(report__user=user)
+            connections = Connection.objects.filter(report__user=user)
 
-            total_count = transactions.count()
-            fraud_count = transactions.filter(is_fraud=True).count()
+            total_count = connections.count()
+            fraud_count = connections.filter(is_fraud=True).count()
             non_fraud_count = total_count - fraud_count
             fraud_percentage = round((fraud_count / total_count * 100), 2) if total_count > 0 else 0
 
-            # Самое популярное место по транзакциям
-            popular_location = transactions.values('location').annotate(loc_count=Count('id')).order_by(
+            # Самое популярное место
+            popular_location = connections.values('location').annotate(loc_count=Count('id')).order_by(
                 '-loc_count').first()
             if popular_location:
                 popular_location = popular_location['location']

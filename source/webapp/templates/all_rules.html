@@ -30,12 +30,6 @@
             <li><a href="{% url 'firewall_rules' %}">Firewall Rules</a></li>
             <li><a href="{% url 'all_rules' %}" class="active">All Rules</a></li>
             <li>
-                <button data-bs-toggle="modal" data-bs-target="#exampleModal"
-                        style="display: block; padding: 0.8rem 2rem; color: var(--text-medium); text-decoration: none; transition: all 0.3s ease; border-left: 3px solid transparent; background: none; border: none;">
-                    Add Report
-                </button>
-            </li>
-            <li>
                 <a href="{% url 'export_excel' request.user.pk %}?report_id={{ report.id }}&is_fraud={{ current_is_fraud }}">
                     Export to EXCEL
                 </a>
@@ -54,7 +48,7 @@
         <div class="container">
         <h1 class="text-center mb-4">All Generated Firewall Rules - Username: {{ user.username }}</h1>
 
-            {% if transactions_with_rules %}
+            {% if connection_with_rules %}
                 <div class="rule-preview" style="margin-bottom: 30px;">
                     <h5 class="text-success" style="margin-bottom: 10px;">All Rules Console</h5>
                     <pre style="
@@ -67,7 +61,7 @@
                         word-wrap: break-word;
                         box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
                     ">
-                    {% for item in transactions_with_rules %}
+                    {% for item in connection_with_rules %}
     # --- Connection ID: {{ item.id }} ---
     {{ item.rule }}
 

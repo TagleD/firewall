@@ -5,7 +5,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{{ user.username }} Transactions</title>
+    <title>{{ user.username }} Connections</title>
 
     <link href="{% static '/css/bootstrap.min.css' %}" rel="stylesheet">
     <link href="{% static 'css/dashboard.css' %}" rel="stylesheet">
@@ -70,7 +70,7 @@
                             {{ total_count }}
                             {% if not report %}
                                 <span style="font-size: 16px;">
-                                    +{{ new_transactions_count }} since the last report
+                                    +{{ new_connections_count }} since the last report
                                 </span>
                             {% endif %}
                         </div>
@@ -81,7 +81,7 @@
                             {{ fraud_count }}
                             {% if not report %}
                                 <span style="font-size: 16px;">
-                                    +{{ new_fraud_transactions_count }} since the last report
+                                    +{{ new_fraud_connections_count }} since the last report
                                 </span>
                             {% endif %}
                         </div>
@@ -122,13 +122,13 @@
             </pre>
         </div>
 
-        <!-- Модалка для данных транзакции -->
-        <div class="modal fade" id="transactionModal" tabindex="-1" aria-labelledby="transactionModalLabel"
+        <!-- Модалка -->
+        <div class="modal fade" id="connectionModal" tabindex="-1" aria-labelledby="connectionModalLabel"
              aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title black-text" id="transactionModalLabel">Transaction Details</h5>
+                        <h5 class="modal-title black-text" id="connectionModalLabel">Connection Details</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -136,43 +136,43 @@
                             <tbody>
                             <tr>
                                 <th>ID</th>
-                                <td id="modalTransactionID"></td>
+                                <td id="modalConnectionID"></td>
                             </tr>
                             <tr>
                                 <th>Time</th>
-                                <td id="modalTransactionTime"></td>
+                                <td id="modalConnectionTime"></td>
                             </tr>
                             <tr>
                                 <th>IP Address</th>
-                                <td id="modalTransactionIPAddress"></td>
+                                <td id="modalConnectionIPAddress"></td>
                             </tr>
                             <tr>
                                 <th>Protocol</th>
-                                <td id="modalTransactionProtocol"></td>
+                                <td id="modalConnectionProtocol"></td>
                             </tr>
                             <tr>
                                 <th>Bytes</th>
-                                <td id="modalTransactionBytes"></td>
+                                <td id="modalConnectionBytes"></td>
                             </tr>
                             <tr>
                                 <th>Report</th>
-                                <td id="modalTransactionReport"></td>
+                                <td id="modalConnectionReport"></td>
                             </tr>
                             <tr>
                                 <th>Risk Score</th>
-                                <td id="modalTransactionRiskScore"></td>
+                                <td id="modalConnectionRiskScore"></td>
                             </tr>
                             <tr>
                                 <th>Status</th>
-                                <td id="modalTransactionStatus"></td>
+                                <td id="modalConnectionStatus"></td>
                             </tr>
                             {#                                <tr>#}
                             {#                                    <th>Explanation</th>#}
-                            {#                                    <td id="modalTransactionExplanation"></td>#}
+                            {#                                    <td id="modalConnectionExplanation"></td>#}
                             {#                                </tr>#}
                             <tr>
                                 <th>Location</th>
-                                <td id="modalTransactionLocation"></td>
+                                <td id="modalConnectionLocation"></td>
                             </tr>
                             </tbody>
                         </table>
@@ -189,11 +189,11 @@
                                 white-space: pre-wrap;
                                 word-wrap: break-word;
                             ">
-                                
+
                             </pre>
                         </div>
 
-                        {#                        <div id="transactionMap" style="width: 100%; height: 400px;"></div>#}
+                        {#                        <div id="connectionMap" style="width: 100%; height: 400px;"></div>#}
 
                         {#                            <h6 class="mt-3">V1 - V28 Data</h6>#}
                         {#                            <div class="table-responsive">#}
@@ -207,115 +207,115 @@
                         {#                                    <tbody>#}
                         {#                                    <tr>#}
                         {#                                        <td>V1</td>#}
-                        {#                                        <td id="modalTransactionV1"></td>#}
+                        {#                                        <td id="modalConnectionV1"></td>#}
                         {#                                    </tr>#}
                         {#                                    <tr>#}
                         {#                                        <td>V2</td>#}
-                        {#                                        <td id="modalTransactionV2"></td>#}
+                        {#                                        <td id="modalConnectionV2"></td>#}
                         {#                                    </tr>#}
                         {#                                    <tr>#}
                         {#                                        <td>V3</td>#}
-                        {#                                        <td id="modalTransactionV3"></td>#}
+                        {#                                        <td id="modalConnectionV3"></td>#}
                         {#                                    </tr>#}
                         {#                                    <tr>#}
                         {#                                        <td>V4</td>#}
-                        {#                                        <td id="modalTransactionV4"></td>#}
+                        {#                                        <td id="modalConnectionV4"></td>#}
                         {#                                    </tr>#}
                         {#                                    <tr>#}
                         {#                                        <td>V5</td>#}
-                        {#                                        <td id="modalTransactionV5"></td>#}
+                        {#                                        <td id="modalConnectionV5"></td>#}
                         {#                                    </tr>#}
                         {#                                    <tr>#}
                         {#                                        <td>V6</td>#}
-                        {#                                        <td id="modalTransactionV6"></td>#}
+                        {#                                        <td id="modalConnectionV6"></td>#}
                         {#                                    </tr>#}
                         {#                                    <tr>#}
                         {#                                        <td>V7</td>#}
-                        {#                                        <td id="modalTransactionV7"></td>#}
+                        {#                                        <td id="modalConnectionV7"></td>#}
                         {#                                    </tr>#}
                         {#                                    <tr>#}
                         {#                                        <td>V8</td>#}
-                        {#                                        <td id="modalTransactionV8"></td>#}
+                        {#                                        <td id="modalConnectionV8"></td>#}
                         {#                                    </tr>#}
                         {#                                    <tr>#}
                         {#                                        <td>V9</td>#}
-                        {#                                        <td id="modalTransactionV9"></td>#}
+                        {#                                        <td id="modalConnectionV9"></td>#}
                         {#                                    </tr>#}
                         {#                                    <tr>#}
                         {#                                        <td>V10</td>#}
-                        {#                                        <td id="modalTransactionV10"></td>#}
+                        {#                                        <td id="modalConnectionV10"></td>#}
                         {#                                    </tr>#}
                         {#                                    <tr>#}
                         {#                                        <td>V11</td>#}
-                        {#                                        <td id="modalTransactionV11"></td>#}
+                        {#                                        <td id="modalConnectionV11"></td>#}
                         {#                                    </tr>#}
                         {#                                    <tr>#}
                         {#                                        <td>V12</td>#}
-                        {#                                        <td id="modalTransactionV12"></td>#}
+                        {#                                        <td id="modalConnectionV12"></td>#}
                         {#                                    </tr>#}
                         {#                                    <tr>#}
                         {#                                        <td>V13</td>#}
-                        {#                                        <td id="modalTransactionV13"></td>#}
+                        {#                                        <td id="modalConnectionV13"></td>#}
                         {#                                    </tr>#}
                         {#                                    <tr>#}
                         {#                                        <td>V14</td>#}
-                        {#                                        <td id="modalTransactionV14"></td>#}
+                        {#                                        <td id="modalConnectionV14"></td>#}
                         {#                                    </tr>#}
                         {#                                    <tr>#}
                         {#                                        <td>V15</td>#}
-                        {#                                        <td id="modalTransactionV15"></td>#}
+                        {#                                        <td id="modalConnectionV15"></td>#}
                         {#                                    </tr>#}
                         {#                                    <tr>#}
                         {#                                        <td>V16</td>#}
-                        {#                                        <td id="modalTransactionV16"></td>#}
+                        {#                                        <td id="modalConnectionV16"></td>#}
                         {#                                    </tr>#}
                         {#                                    <tr>#}
                         {#                                        <td>V17</td>#}
-                        {#                                        <td id="modalTransactionV17"></td>#}
+                        {#                                        <td id="modalConnectionV17"></td>#}
                         {#                                    </tr>#}
                         {#                                    <tr>#}
                         {#                                        <td>V18</td>#}
-                        {#                                        <td id="modalTransactionV18"></td>#}
+                        {#                                        <td id="modalConnectionV18"></td>#}
                         {#                                    </tr>#}
                         {#                                    <tr>#}
                         {#                                        <td>V19</td>#}
-                        {#                                        <td id="modalTransactionV19"></td>#}
+                        {#                                        <td id="modalConnectionV19"></td>#}
                         {#                                    </tr>#}
                         {#                                    <tr>#}
                         {#                                        <td>V20</td>#}
-                        {#                                        <td id="modalTransactionV20"></td>#}
+                        {#                                        <td id="modalConnectionV20"></td>#}
                         {#                                    </tr>#}
                         {#                                    <tr>#}
                         {#                                        <td>V21</td>#}
-                        {#                                        <td id="modalTransactionV21"></td>#}
+                        {#                                        <td id="modalConnectionV21"></td>#}
                         {#                                    </tr>#}
                         {#                                    <tr>#}
                         {#                                        <td>V22</td>#}
-                        {#                                        <td id="modalTransactionV22"></td>#}
+                        {#                                        <td id="modalConnectionV22"></td>#}
                         {#                                    </tr>#}
                         {#                                    <tr>#}
                         {#                                        <td>V23</td>#}
-                        {#                                        <td id="modalTransactionV23"></td>#}
+                        {#                                        <td id="modalConnectionV23"></td>#}
                         {#                                    </tr>#}
                         {#                                    <tr>#}
                         {#                                        <td>V24</td>#}
-                        {#                                        <td id="modalTransactionV24"></td>#}
+                        {#                                        <td id="modalConnectionV24"></td>#}
                         {#                                    </tr>#}
                         {#                                    <tr>#}
                         {#                                        <td>V25</td>#}
-                        {#                                        <td id="modalTransactionV25"></td>#}
+                        {#                                        <td id="modalConnectionV25"></td>#}
                         {#                                    </tr>#}
                         {#                                    <tr>#}
                         {#                                        <td>V26</td>#}
-                        {#                                        <td id="modalTransactionV26"></td>#}
+                        {#                                        <td id="modalConnectionV26"></td>#}
                         {#                                    </tr>#}
                         {#                                    <tr>#}
                         {#                                        <td>V27</td>#}
-                        {#                                        <td id="modalTransactionV27"></td>#}
+                        {#                                        <td id="modalConnectionV27"></td>#}
                         {#                                    </tr>#}
                         {#                                    <tr>#}
                         {#                                        <td>V28</td>#}
-                        {#                                        <td id="modalTransactionV28"></td>#}
+                        {#                                        <td id="modalConnectionV28"></td>#}
                         {#                                    </tr>#}
                         {#                                    </tbody>#}
                         {#                                </table>#}
@@ -328,7 +328,7 @@
             </div>
         </div>
 
-        <!-- Вывод списка транзакций -->
+        <!-- Вывод списка -->
         <div class="card" style=" margin-bottom: 100px; margin-top:40px;">
             <div class="card-body">
                 {% if report %}
@@ -413,22 +413,22 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for transaction in transactions %}
+                    {% for connection in connections %}
                         <tr>
-                            <th scope="row" style="padding-left: 30px">{{ transaction.connect_varchar_id }}</th>
-                            <td>{{ transaction.time|date:"d M H:i" }}</td>
-                            <td>{{ transaction.ip_address }}</td>
-                            <td>{{ transaction.protocol }}</td>
-                            <td>{{ transaction.bytes }}</td>
+                            <th scope="row" style="padding-left: 30px">{{ connection.connect_varchar_id }}</th>
+                            <td>{{ connection.time|date:"d M H:i" }}</td>
+                            <td>{{ connection.ip_address }}</td>
+                            <td>{{ connection.protocol }}</td>
+                            <td>{{ connection.bytes }}</td>
                             <td>
                                 <p
-                                        {% if transaction.risk_score > 0 and transaction.risk_score < 60 %}
+                                        {% if connection.risk_score > 0 and connection.risk_score < 60 %}
                                             style="color: #7fd87f; display: inline;"
                                         {% endif %}
-                                        {% if transaction.risk_score >= 60 and transaction.risk_score < 80 %}
+                                        {% if connection.risk_score >= 60 and connection.risk_score < 80 %}
                                             style="color: orange; display: inline;"
                                         {% endif %}
-                                        {% if transaction.risk_score >= 80 %}
+                                        {% if connection.risk_score >= 80 %}
                                             style="color: #ff0000; display: inline;"
                                         {% endif %}
 
@@ -438,10 +438,10 @@
                                          style="margin-right: -6px;padding-top: 3px;">
                                         <circle cx="4" cy="4" r="4"/>
                                     </svg>
-                                    {{ transaction.risk_score }}%
+                                    {{ connection.risk_score }}%
                                 </p>
                             </td>
-                            {% if transaction.is_fraud == False %}
+                            {% if connection.is_fraud == False %}
                                 <td>
                                     <p style="margin:0; font-size: 14px; border: 1px solid #90ee90; border-radius: 50px; text-align: left; background: #e6ffe6; color: #7fd87f;">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
@@ -468,50 +468,50 @@
                                 </td>
                             {% endif %}
                             <td style="padding-left: 50px;">
-                                {% if transaction.risk_score >= 60 %}
+                                {% if connection.risk_score >= 60 %}
                                     <button class="view-data btn btn-outline-secondary btn-view"
                                             style="padding: 1px 5px; font-size: 14px;"
-                                            data-id="{{ transaction.connect_varchar_id }}"
-                                            data-time="{{ transaction.time|date:"D, d M Y H:i" }}"
-                                            data-protocol="{{ transaction.protocol }}"
-                                            data-bytes="{{ transaction.bytes }}"
-                                            data-rules="{{ transaction.firewall_rule }}"
-                                            data-ip-address="{{ transaction.ip_address }}"
-                                            data-report="{{ transaction.report.name }}"
-                                            data-status="{% if transaction.is_fraud %}Malicious{% else %}Safe{% endif %}"
-                                            data-v1="{{ transaction.v1 }}"
-                                            data-v2="{{ transaction.v2 }}"
-                                            data-v3="{{ transaction.v3 }}"
-                                            data-v4="{{ transaction.v4 }}"
-                                            data-v5="{{ transaction.v5 }}"
-                                            data-v6="{{ transaction.v6 }}"
-                                            data-v7="{{ transaction.v7 }}"
-                                            data-v8="{{ transaction.v8 }}"
-                                            data-v9="{{ transaction.v9 }}"
-                                            data-v10="{{ transaction.v10 }}"
-                                            data-v11="{{ transaction.v11 }}"
-                                            data-v12="{{ transaction.v12 }}"
-                                            data-v13="{{ transaction.v13 }}"
-                                            data-v14="{{ transaction.v14 }}"
-                                            data-v15="{{ transaction.v15 }}"
-                                            data-v16="{{ transaction.v16 }}"
-                                            data-v17="{{ transaction.v17 }}"
-                                            data-v18="{{ transaction.v18 }}"
-                                            data-v19="{{ transaction.v19 }}"
-                                            data-v20="{{ transaction.v20 }}"
-                                            data-v21="{{ transaction.v21 }}"
-                                            data-v22="{{ transaction.v22 }}"
-                                            data-v23="{{ transaction.v23 }}"
-                                            data-v24="{{ transaction.v24 }}"
-                                            data-v25="{{ transaction.v25 }}"
-                                            data-v26="{{ transaction.v26 }}"
-                                            data-v27="{{ transaction.v27 }}"
-                                            data-v28="{{ transaction.v28 }}"
-                                            data-risk_score="{{ transaction.risk_score }}%"
-                                            data-explanation="{{ transaction.explanation }}"
-                                            data-latitude="{{ transaction.latitude }}"
-                                            data-longitude="{{ transaction.longitude }}"
-                                            data-location="{{ transaction.location }}"
+                                            data-id="{{ connection.connect_varchar_id }}"
+                                            data-time="{{ connection.time|date:"D, d M Y H:i" }}"
+                                            data-protocol="{{ connection.protocol }}"
+                                            data-bytes="{{ connection.bytes }}"
+                                            data-rules="{{ connection.firewall_rule }}"
+                                            data-ip-address="{{ connection.ip_address }}"
+                                            data-report="{{ connection.report.name }}"
+                                            data-status="{% if connection.is_fraud %}Malicious{% else %}Safe{% endif %}"
+                                            data-v1="{{ connection.v1 }}"
+                                            data-v2="{{ connection.v2 }}"
+                                            data-v3="{{ connection.v3 }}"
+                                            data-v4="{{ connection.v4 }}"
+                                            data-v5="{{ connection.v5 }}"
+                                            data-v6="{{ connection.v6 }}"
+                                            data-v7="{{ connection.v7 }}"
+                                            data-v8="{{ connection.v8 }}"
+                                            data-v9="{{ connection.v9 }}"
+                                            data-v10="{{ connection.v10 }}"
+                                            data-v11="{{ connection.v11 }}"
+                                            data-v12="{{ connection.v12 }}"
+                                            data-v13="{{ connection.v13 }}"
+                                            data-v14="{{ connection.v14 }}"
+                                            data-v15="{{ connection.v15 }}"
+                                            data-v16="{{ connection.v16 }}"
+                                            data-v17="{{ connection.v17 }}"
+                                            data-v18="{{ connection.v18 }}"
+                                            data-v19="{{ connection.v19 }}"
+                                            data-v20="{{ connection.v20 }}"
+                                            data-v21="{{ connection.v21 }}"
+                                            data-v22="{{ connection.v22 }}"
+                                            data-v23="{{ connection.v23 }}"
+                                            data-v24="{{ connection.v24 }}"
+                                            data-v25="{{ connection.v25 }}"
+                                            data-v26="{{ connection.v26 }}"
+                                            data-v27="{{ connection.v27 }}"
+                                            data-v28="{{ connection.v28 }}"
+                                            data-risk_score="{{ connection.risk_score }}%"
+                                            data-explanation="{{ connection.explanation }}"
+                                            data-latitude="{{ connection.latitude }}"
+                                            data-longitude="{{ connection.longitude }}"
+                                            data-location="{{ connection.location }}"
                                     >
                                         View Rules
                                     </button>
@@ -525,26 +525,26 @@
 
                 <nav style="margin-top: 20px;">
                     <ul class="pagination" style="justify-content: center;">
-                        {% if transactions.has_previous %}
+                        {% if connections.has_previous %}
                             <li class="page-item">
                                 <a class="page-link btn-primary"
                                    href="?page=1{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">First</a>
                             </li>
                             <li class="page-item">
-                                <a class="page-link btn-primary" href="?page={{ transactions.previous_page_number }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Back</a>
+                                <a class="page-link btn-primary" href="?page={{ connections.previous_page_number }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Back</a>
                             </li>
                         {% endif %}
 
                         <li class="page-item disabled">
-                            <span class="page-link">Page {{ transactions.number }} of {{ transactions.paginator.num_pages }}</span>
+                            <span class="page-link">Page {{ connections.number }} of {{ connections.paginator.num_pages }}</span>
                         </li>
 
-                        {% if transactions.has_next %}
+                        {% if connections.has_next %}
                             <li class="page-item">
-                                <a class="page-link btn-primary" href="?page={{ transactions.next_page_number }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Forward</a>
+                                <a class="page-link btn-primary" href="?page={{ connections.next_page_number }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Forward</a>
                             </li>
                             <li class="page-item">
-                                <a class="page-link btn-primary" href="?page={{ transactions.paginator.num_pages }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Last</a>
+                                <a class="page-link btn-primary" href="?page={{ connections.paginator.num_pages }}{% if request.GET.report_id %}&report_id={{ request.GET.report_id }}{% endif %}&is_fraud={{ current_is_fraud }}&search={{ search_query }}">Last</a>
                             </li>
                         {% endif %}
                     </ul>
@@ -684,69 +684,6 @@ ${rule.trim()}
             document.getElementById("lastRuleGeneratedBlock").scrollIntoView({behavior: "smooth"});
         });
     });
-</script>
-
-<script>
-    {#document.addEventListener("DOMContentLoaded", function () {#}
-    {#    let viewDataButtons = document.querySelectorAll(".view-data");#}
-    {##}
-    {#    viewDataButtons.forEach(button => {#}
-    {#        button.addEventListener("click", function (event) {#}
-    {#            event.preventDefault();#}
-    {##}
-    {#            // Получаем данные из атрибутов кнопки#}
-    {#            document.getElementById("modalTransactionID").textContent = this.getAttribute("data-id");#}
-    {#            document.getElementById("modalTransactionTime").textContent = this.getAttribute("data-time");#}
-    {#            document.getElementById("modalTransactionProtocol").textContent = this.getAttribute("data-protocol");#}
-    {#            document.getElementById("modalTransactionIPAddress").textContent = this.getAttribute("data-ip-address");#}
-    {#            document.getElementById("modalTransactionReport").textContent = this.getAttribute("data-report");#}
-    {#            document.getElementById("modalTransactionBytes").textContent = this.getAttribute("data-bytes");#}
-    {#            document.getElementById("modalTransactionStatus").textContent = this.getAttribute("data-status");#}
-    {#            document.getElementById("modalTransactionRiskScore").textContent = this.getAttribute("data-risk_score");#}
-    {#document.getElementById("modalTransactionExplanation").textContent = this.getAttribute("data-explanation");#}
-    {#            document.getElementById("modalTransactionLocation").textContent = this.getAttribute("data-location");#}
-    {#            document.getElementById("modalTransactionRules").textContent = this.getAttribute("data-rules");#}
-    {##}
-    {#// Заполняем V1-V28 (можно упростить циклом)#}
-    {#for (let i = 1; i <= 28; i++) {#}
-    {#    document.getElementById(`modalTransactionV${i}`).textContent = this.getAttribute(`data-v${i}`);#}
-    {#            //{#}
-    {##}
-    {#            // Получаем координаты транзакции#}
-    {#let latitude = parseFloat(this.getAttribute("data-latitude")) || 43.238949; // Москва по умолчанию#}
-    {#let longitude = parseFloat(this.getAttribute("data-longitude")) || 76.889709;#}
-    {##}
-    {#// Удаляем старую карту, если есть#}
-    {#let mapContainer = document.getElementById("transactionMap");#}
-    {#mapContainer.innerHTML = ""; // Чистим контейнер перед созданием новой карты#}
-    {#let newMapDiv = document.createElement("div");#}
-    {#newMapDiv.id = "transactionMapInner";#}
-    {#newMapDiv.style.width = "100%";#}
-    {#newMapDiv.style.height = "400px";#}
-    {#mapContainer.appendChild(newMapDiv);#}
-    {##}
-    {#// Инициализируем карту#}
-    {#ymaps.ready(function () {#}
-    {#    let map = new ymaps.Map("transactionMapInner", {#}
-    {#        center: [latitude, longitude],#}
-    {#        zoom: 12#}
-    {#    });#}
-    {##}
-    {#    let placemark = new ymaps.Placemark([latitude, longitude], {#}
-    {#        balloonContent: `Транзакция ID: ${button.getAttribute("data-id")}<br>Время: ${button.getAttribute("data-time")}`#}
-    {#    });#}
-    {##}
-    {#    map.geoObjects.add(placemark);#}
-    {#            <!--});-->#}
-    {##}
-    {#            // Открываем модальное окно#}
-    {#            let modal = new bootstrap.Modal(document.getElementById("transactionModal"));#}
-    {#            modal.show();#}
-    {#        });#}
-    {#    });#}
-    {#})
-        ;
-    #}
 </script>
 
 <script>

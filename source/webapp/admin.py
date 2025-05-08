@@ -19,8 +19,8 @@ class ReportAdmin(admin.ModelAdmin):
     )
 
 
-@admin.register(Transaction)
-class TransactionAdmin(admin.ModelAdmin):
+@admin.register(Connection)
+class ConnectionAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'report',

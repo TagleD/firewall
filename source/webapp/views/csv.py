@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 
-from ..models import Transaction, Report
+from ..models import Connection, Report
 from ..forms import CSVUploadForm
 from ..utils import predict_anomaly
 
@@ -22,13 +22,13 @@ def upload_csv(request):
             # Создаём новый отчет
             report = Report.objects.create(user=request.user, name=report_name)
 
-            transactions = []
+            connections = []
             for row in reader:
                 time, amount = float(row[0]), float(row[29])
                 features = list(map(float, row[1:29]))  # V1 - V28
-                is_fraud = predict_anomaly(features)  # Анализируем транзакцию
+                is_fraud = predict_anomaly(features)  # Анализируем
 
-                transaction = Transaction(
+                connection = Connection(
                     report=report,
                     time=time,
                     amount=amount,
@@ -41,9 +41,9 @@ def upload_csv(request):
                     v25=features[24], v26=features[25], v27=features[26], v28=features[27],
                     is_fraud=is_fraud,
                 )
-                transactions.append(transaction)
+                connections.append(connection)
 
-            Transaction.objects.bulk_create(transactions)  # Массовая вставка в базу
+            Connection.objects.bulk_create(connections)  # Массовая вставка в базу
             return reverse('user_detail', kwargs={'pk': request.user.pk})
 
     else:

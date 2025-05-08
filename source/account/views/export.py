@@ -4,7 +4,7 @@ import openpyxl
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse
 
-from webapp.models import Transaction, Report
+from webapp.models import Connection, Report
 
 
 def export_to_excel(request, pk):
@@ -13,23 +13,23 @@ def export_to_excel(request, pk):
     user = get_user_model().objects.get(pk=pk)
     report_id = request.GET.get('report_id')
     is_fraud = request.GET.get('is_fraud')
-    transactions = Transaction.objects.filter(report__user=user)
+    connections = Connection.objects.filter(report__user=user)
 
     if is_fraud == "1":
-        transactions = transactions.filter(is_fraud=True)
+        connections = connections.filter(is_fraud=True)
     elif is_fraud == "0":
-        transactions = transactions.filter(is_fraud=False)
+        connections = connections.filter(is_fraud=False)
 
     if report_id:
         try:
             report = Report.objects.get(id=report_id, user=user)
-            transactions = transactions.filter(report=report)
+            connections = connections.filter(report=report)
         except Report.DoesNotExist:
-            transactions = Transaction.objects.none()
+            connections = Connection.objects.none()
 
     wb = openpyxl.Workbook()
     ws = wb.active
-    ws.title = "Транзакции"
+    ws.title = "Соединения"
 
     headers = [
                   "№", "Connection ID", "Malicious", "Date", "Risk (%)", "IP", "Port", "Bytes", "Connection Time (sec)",
@@ -37,7 +37,7 @@ def export_to_excel(request, pk):
               ] + [f"V{i}" for i in range(1, 29)]
     ws.append(headers)
 
-    for i, t in enumerate(transactions, start=1):
+    for i, t in enumerate(connections, start=1):
         formatted_date = t.time.strftime('%d.%m.%Y %H:%M') if t.time else ''
         ws.append([
             i,
@@ -69,7 +69,7 @@ def export_to_excel(request, pk):
         ws.column_dimensions[col_letter].width = max_length + 2
 
     response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-    response["Content-Disposition"] = 'attachment; filename="transactions.xlsx"'
+    response["Content-Disposition"] = 'attachment; filename="connections.xlsx"'
     wb.save(response)
     return response
 
@@ -79,22 +79,22 @@ def export_to_csv(request, pk):
 
     report_id = request.GET.get('report_id')
     is_fraud = request.GET.get('is_fraud')
-    transactions = Transaction.objects.filter(report__user=user)
+    connections = Connection.objects.filter(report__user=user)
 
     if is_fraud == "1":
-        transactions = transactions.filter(is_fraud=True)
+        connections = connections.filter(is_fraud=True)
     elif is_fraud == "0":
-        transactions = transactions.filter(is_fraud=False)
+        connections = connections.filter(is_fraud=False)
 
     if report_id:
         try:
             report = Report.objects.get(id=report_id, user=user)
-            transactions = transactions.filter(report=report)
+            connections = connections.filter(report=report)
         except Report.DoesNotExist:
-            transactions = Transaction.objects.none()
+            connections = Connection.objects.none()
 
     response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = 'attachment; filename="transactions.csv"'
+    response["Content-Disposition"] = 'attachment; filename="connections.csv"'
 
     writer = csv.writer(response)
     headers = [
@@ -103,7 +103,7 @@ def export_to_csv(request, pk):
               ] + [f"V{i}" for i in range(1, 29)]
     writer.writerow(headers)
 
-    for i, t in enumerate(transactions, start=1):
+    for i, t in enumerate(connections, start=1):
         formatted_date = t.time.strftime('%d.%m.%Y %H:%M') if t.time else ''
         coordinates = f"{t.latitude}, {t.longitude}" if t.latitude and t.longitude else ""
         writer.writerow([

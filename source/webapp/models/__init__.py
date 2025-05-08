@@ -1,2 +1,2 @@
-from .transaction import Transaction
+from .connection import Connection
 from .report import Report

@@ -30,12 +30,6 @@
             <li><a href="{% url 'firewall_rules' %}" class="active">Firewall Rules</a></li>
             <li><a href="{% url 'all_rules' %}">All Rules</a></li>
             <li>
-                <button data-bs-toggle="modal" data-bs-target="#exampleModal"
-                        style="display: block; padding: 0.8rem 2rem; color: var(--text-medium); text-decoration: none; transition: all 0.3s ease; border-left: 3px solid transparent; background: none; border: none;">
-                    Add Report
-                </button>
-            </li>
-            <li>
                 <a href="{% url 'export_excel' request.user.pk %}?report_id={{ report.id }}&is_fraud={{ current_is_fraud }}">
                     Export to EXCEL
                 </a>
