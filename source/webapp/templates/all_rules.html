@@ -28,7 +28,7 @@
             <li><a href="{% url 'user_detail' request.user.pk %}" class="">Dashboard</a></li>
             <li><a href="{% url 'user_statistics' %}">User Statistics</a></li>
             <li><a href="{% url 'firewall_rules' %}">Firewall Rules</a></li>
-            <li><a href="{% url 'all_rules' %}">All Rules</a></li>
+            <li><a href="{% url 'all_rules' %}" class="active">All Rules</a></li>
             <li>
                 <button data-bs-toggle="modal" data-bs-target="#exampleModal"
                         style="display: block; padding: 0.8rem 2rem; color: var(--text-medium); text-decoration: none; transition: all 0.3s ease; border-left: 3px solid transparent; background: none; border: none;">
@@ -51,49 +51,32 @@
     </aside>
 
     <div class="main-content">
-        <h1 class="text-center mb-4">Users Firewall Statistics</h1>
+        <div class="container">
+        <h1 class="text-center mb-4">All Generated Firewall Rules - Username: {{ user.username }}</h1>
 
-        <div class="row">
-            {% for item in users_data %}
-                <div class="col-md-6 col-lg-4 mb-4">
-                    <div class="card p-3 dashboard-cards" style="height: 100%;">
-                        <h5 class="card-title">{{ item.user.username }}</h5>
+            {% if transactions_with_rules %}
+                <div class="rule-preview" style="margin-bottom: 30px;">
+                    <h5 class="text-success" style="margin-bottom: 10px;">All Rules Console</h5>
+                    <pre style="
+                        background-color: #1e1e1e;
+                        color: #a6e22e;
+                        padding: 20px;
+                        border-radius: 10px;
+                        font-size: 14px;
+                        white-space: pre-wrap;
+                        word-wrap: break-word;
+                        box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+                    ">
+                    {% for item in transactions_with_rules %}
+    # --- Connection ID: {{ item.id }} ---
+    {{ item.rule }}
 
-                        <div class="card mt-3">
-                            <div class="card-title">Total Connections</div>
-                            <div class="card-value">
-                                {{ item.total_count }}
-                            </div>
-                        </div>
-
-                        <div class="card mt-3">
-                            <div class="card-title">Malicious Connections</div>
-                            <div class="card-value red-text">
-                                {{ item.fraud_count }}
-                            </div>
-                        </div>
-
-                        <div class="card mt-3">
-                            <div class="card-title">Malicious Rate</div>
-                            <div class="card-value secondary-text">
-                                {{ item.fraud_percentage }}%
-                            </div>
-                        </div>
-
-                        <div class="card mt-3">
-                            <div class="card-title">Most Popular Location</div>
-                            <div class="card-value light-text">
-                                {{ item.popular_location }}
-                            </div>
-                        </div>
-                    </div>
+                    {% endfor %}
+                    </pre>
                 </div>
-                {% empty %}
-                <p class="text-center">No users found.</p>
-            {% endfor %}
+            {% endif %}
         </div>
     </div>
-
 </div>
 {# End of new dashborad #}
 

@@ -11,4 +11,7 @@ urlpatterns = [
 
     # Firewall Rules
     path('firewall_rules/', views.FirewallRulesView.as_view(), name='firewall_rules'),
+
+    # All Rules
+    path('all_rules/', views.AllRulesView.as_view(), name='all_rules'),
 ]
