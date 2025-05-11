@@ -48,7 +48,7 @@
         <div class="container">
         <h1 class="text-center mb-4">All Generated Firewall Rules - Username: {{ user.username }}</h1>
 
-            {% if connection_with_rules %}
+            {% if connections_with_rules %}
                 <div class="rule-preview" style="margin-bottom: 30px;">
                     <h5 class="text-success" style="margin-bottom: 10px;">All Rules Console</h5>
                     <pre style="
@@ -61,7 +61,7 @@
                         word-wrap: break-word;
                         box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
                     ">
-                    {% for item in connection_with_rules %}
+                    {% for item in connections_with_rules %}
     # --- Connection ID: {{ item.id }} ---
     {{ item.rule }}
 
